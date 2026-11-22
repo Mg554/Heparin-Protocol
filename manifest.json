@@ -1,14 +1,11 @@
 {
-  "name": "Heparin Infusion Protocol",
-  "short_name": "Heparin",
-  "description": "Weight-Based IV Heparin Titration Nomogram (Raschke Protocol)",
+  "name": "Heparin Protocol Simulation",
+  "short_name": "Heparin demo",
+  "description": "Fictional IV heparin dosing examples for safety review. Not for patient care or charting.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0d1b2a",
-  "theme_color": "#e63946",
-  "orientation": "portrait",
-  "lang": "ar",
-  "dir": "rtl",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "./icon-192.png",
@@ -23,19 +20,14 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["medical", "health"],
   "shortcuts": [
     {
-      "name": "Initial Dosing",
-      "short_name": "البدء",
-      "url": "./index.html#init",
-      "description": "Calculate initial heparin dose"
+      "name": "Simulate initiation",
+      "url": "./index.html#init"
     },
     {
-      "name": "Titration",
-      "short_name": "Titration",
-      "url": "./index.html#titrate",
-      "description": "Adjust dose based on aPTT"
+      "name": "Simulate titration",
+      "url": "./index.html#titrate"
     }
   ]
 }
