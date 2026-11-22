@@ -45,10 +45,20 @@
         <div class="field"><label for="protocol">Sample protocol</label><select id="protocol" name="protocol"><option value="">Select</option><option value="vte">DVT/PE</option><option value="acs">ACS/NSTEMI</option><option id="high" value="high">High bleeding risk (initiation only)</option></select></div>
         <div class="field"><label for="basis">Dosing-weight basis</label><select id="basis" name="basis"><option value="">Select</option><option value="actual">Actual</option><option value="ideal">Ideal</option><option value="adjusted">Adjusted</option></select></div>
         <div class="field"><label for="weight">Dosing weight (kg)</label><input id="weight" name="weight" inputmode="decimal" aria-describedby="weight-help"><small id="weight-help">Enter the scenario’s dosing weight (30–200 kg). This tool does not derive or select it.</small></div>
-        <div class="field"><label for="concentration">Infusion bag (units/mL)</label><select id="concentration" name="concentration"><option value="">Select</option><option value="40">40 (20,000 units / 500 mL)</option><option value="50">50 (25,000 units / 500 mL)</option><option value="100">100 (25,000 units / 250 mL)</option></select></div>
         <div class="field"><label for="ceiling">Scenario infusion ceiling (units/h)</label><input id="ceiling" name="ceiling" inputmode="decimal" aria-describedby="ceiling-help"><small id="ceiling-help">Enter the ceiling specified in your fictional scenario. There is no default.</small></div>
         <div class="field"><label for="safety">Bleeding or suspected HIT</label><select id="safety" name="safety"><option value="">Select</option><option value="clear">Neither flagged in scenario</option><option value="bleed">Active bleeding flagged</option><option value="hit">Suspected HIT flagged</option></select></div>
       </div>
+      <fieldset aria-describedby="prep-help prep-context">
+        <legend>Infusion preparation</legend>
+        <p id="prep-help">Enter the total heparin and final volume on the prepared container label for the fictional scenario. Do not enter the vial strength, bag capacity, or diluent volume alone.</p>
+        <p id="prep-context" hidden><strong>Titration:</strong> Use the running infusion’s concentration. Do not use this workflow to switch to a different concentration.</p>
+        <div class="fields">
+          <div class="field"><label for="container">Container</label><select id="container" name="container"><option value="">Select</option><option value="bag">Infusion bag</option><option value="syringe">Syringe</option></select></div>
+          <div class="field"><label for="totalUnits">Total heparin (units)</label><input id="totalUnits" name="totalUnits" inputmode="numeric" maxlength="12" aria-describedby="units-help"><small id="units-help">Whole units in the full preparation.</small></div>
+          <div class="field"><label for="finalVolume">Final prepared volume (mL)</label><input id="finalVolume" name="finalVolume" inputmode="decimal" maxlength="14" aria-describedby="volume-help"><small id="volume-help">Use the labeled final volume, with up to two decimal places.</small></div>
+        </div>
+        <p id="preparation-preview" role="status">Enter a container, total heparin, and final volume to see the concentration.</p>
+      </fieldset>
       <fieldset id="labs" hidden disabled>
         <legend>Monitoring sample</legend>
         <div class="fields">
@@ -67,7 +77,7 @@
           <div class="field"><label for="plateletCurrent">Current count</label><input id="plateletCurrent" name="plateletCurrent" inputmode="decimal"></div>
         </div>
       </fieldset>
-      <label class="check"><input id="confirm" name="confirm" type="checkbox"> I verified the fictional inputs, including sample timing if applicable. This is not for patient care.</label>
+      <label class="check"><input id="confirm" name="confirm" type="checkbox"> <span>I checked the calculated concentration against the fictional container label and verified the other inputs.<span id="confirm-context" hidden> The preparation is for the running infusion, and I verified sample timing.</span></span></label>
       <button type="submit">Calculate example</button>
     </fieldset>
   </form>
@@ -85,7 +95,7 @@
   </section>
   <details>
     <summary>Limits of this simulation</summary>
-    <p>The aPTT bands come from the repository’s sample tables, not a local lab calibration. Anti-Xa does not select a dose. No workflow calculates reversal, restart timing, or a switch to an oral anticoagulant.</p>
+    <p>The aPTT bands come from the repository’s sample tables, not a local lab calibration. Anti-Xa does not select a dose. The calculator does not validate concentration against a local formulary or flow against a pump library. No workflow calculates reversal, restart timing, or a switch to an oral anticoagulant.</p>
   </details>
 </main>
 </body>
