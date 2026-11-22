@@ -1,8 +1,8 @@
-import { calculate, formatNote } from './heparin.mjs';
+import { calculate, formatNote, preparation } from './heparin.mjs';
 
-const el = (id) => document.getElementById(id);
+const el = (id) =&gt; document.getElementById(id);
 const form = el('calculator');
-const field = (name) => form.elements.namedItem(name);
+const field = (name) =&gt; form.elements.namedItem(name);
 const messages = {
   hit: 'Suspected heparin-induced thrombocytopenia (HIT). No dose displayed. Follow the local HIT escalation pathway.',
   bleed: 'Active bleeding flagged. No dose displayed. Follow the local urgent escalation pathway.',
@@ -23,12 +23,15 @@ const messages = {
   confirm: 'Verify the fictional inputs and check the confirmation box.',
   basis: 'Select the dosing-weight basis specified by the scenario.',
   weight: 'Enter a dosing weight from 30 to 200 kg, with up to two decimal places. Outside this sample range, no dose is displayed.',
-  concentration: 'Select the infusion bag concentration specified by the scenario.',
+  container: 'Choose infusion bag or syringe.',
+  totalUnits: 'Enter 1 to 1,000,000 total units as a whole number, without commas.',
+  finalVolume: 'Enter a final volume from 0.01 to 10,000 mL, with up to two decimal places and no commas.',
   ceiling: 'Enter a positive scenario ceiling up to 5,000 units/h, with up to two decimal places.',
   currentAboveCeiling: 'The current rate already exceeds the entered ceiling. No adjustment displayed.',
   nonpositive: 'The sample adjustment would produce a nonpositive rate. No adjustment or restart displayed.',
   aboveCeiling: 'The calculated or rounded rate exceeds the entered ceiling. No dose displayed.',
   pumpAboveCeiling: 'Pump rounding would exceed the applicable ceiling. No pump setting displayed.',
+  pumpZero: 'The calculated flow rounds to zero at the example pump precision. No pump setting displayed.',
   direction: 'Pump rounding does not preserve the intended adjustment. Review manually; no pump setting displayed.',
 };
 let snapshot = null;
@@ -42,7 +45,16 @@ function clear() {
   el('error').hidden = true;
   el('error').textContent = '';
   el('copy-status').textContent = '';
-  form.querySelectorAll('[aria-invalid]').forEach((input) => input.removeAttribute('aria-invalid'));
+  form.querySelectorAll('\[aria-invalid\]').forEach((input) =&gt; input.removeAttribute('aria-invalid'));
+}
+
+function showPreparation() {
+  const prep = preparation({ container: field('container').value, totalUnits: field('totalUnits').value, finalVolume: field('finalVolume').value });
+  const text = prep.ok
+    ? `${prep.container}: ${prep.totalUnits} units ÷ ${prep.finalVolume} mL = ${prep.concentrationText} units/mL`
+    : 'Enter a container, total heparin, and final volume to see the concentration.';
+  const preview = el('preparation-preview');
+  if (preview.textContent !== text) preview.textContent = text;
 }
 
 function configureAssay() {
@@ -68,15 +80,19 @@ function configureMode() {
   el('high').disabled = titrating;
   el(titrating ? 'init-link' : 'titrate-link').removeAttribute('aria-current');
   el(titrating ? 'titrate-link' : 'init-link').setAttribute('aria-current', 'location');
+  el('prep-context').hidden = !titrating;
+  el('confirm-context').hidden = !titrating;
   configureAssay();
+  showPreparation();
 }
 
 function invalidate(event) {
   if (event.target !== field('confirm')) field('confirm').checked = false;
   clear();
+  if (\['container', 'totalUnits', 'finalVolume'\].includes(event.target.name)) showPreparation();
 }
 form.addEventListener('input', invalidate);
-form.addEventListener('change', (event) => {
+form.addEventListener('change', (event) =&gt; {
   invalidate(event);
   if (event.target === field('assay')) {
     field('lab').value = '';
@@ -88,9 +104,9 @@ form.addEventListener('change', (event) => {
   }
 });
 window.addEventListener('hashchange', configureMode);
-window.addEventListener('pageshow', (event) => { if (event.persisted) configureMode(); });
+window.addEventListener('pageshow', (event) =&gt; { if (event.persisted) configureMode(); });
 
-form.addEventListener('submit', (event) => {
+form.addEventListener('submit', (event) =&gt; {
   event.preventDefault();
   clear();
   const data = Object.fromEntries(new FormData(form));
@@ -98,7 +114,7 @@ form.addEventListener('submit', (event) => {
   if (!result.ok) {
     const error = el('error');
     error.hidden = false;
-    error.textContent = messages[result.code] ?? 'Calculation unavailable. Verify the inputs.';
+    error.textContent = messages\[result.code\] ?? 'Calculation unavailable. Verify the inputs.';
     if (result.field) {
       const input = field(result.field);
       input.setAttribute('aria-invalid', 'true');
@@ -107,22 +123,23 @@ form.addEventListener('submit', (event) => {
     return;
   }
   const r = result;
-  const warnings = [
+  const warnings = \[
     r.high ? 'aPTT is above the sample target.' : '',
     r.holdMinutes ? `Sample nomogram hold: ${r.holdMinutes} minutes. No restart is authorized.` : '',
-    r.rawBolus > r.bolus ? `Sample bolus cap applied (${r.bolusCap} units).` : '',
+    r.rawBolus &gt; r.bolus ? `Sample bolus cap applied (${r.bolusCap} units).` : '',
     r.capped ? `Sample ACS starting-rate cap applied (${r.doseRate} units/h).` : '',
-  ].filter(Boolean);
+    r.roundingDifference ? `Pump rounding delivers ${r.roundingDifference.unitsText} units/h ${r.roundingDifference.direction} the intended example rate.` : '',
+  \].filter(Boolean);
   el('warnings').textContent = warnings.join(' ');
   el('warnings').hidden = warnings.length === 0;
-  const lines = [
-    `${r.protocol} · ${r.weight} kg (${r.basis})${r.band ? ` · ${r.lab} s matched ${r.band}` : ''}.`,
-    r.bolusFactor === 0 ? 'Sample bolus: none.' : `Bolus: ${r.bolusFactor} units/kg × ${r.weight} kg = ${r.rawBolus} units; sample cap ${r.bolusCap} units → ${r.bolus} units. Infusion-bag concentration is not used for bolus volume.`,
+  const lines = \[
+    `${r.protocol} · ${r.weight} kg (${r.basis})${r.band ?`  · ${r.lab} s matched ${r.band} `: ''}.`,
+    `${r.prep.container}: ${r.prep.totalUnits} units ÷ ${r.prep.finalVolume} mL = ${r.prep.concentrationText} units/mL.`,
+    r.bolusFactor === 0 ? 'Sample bolus: none.' : `Bolus: ${r.bolusFactor} units/kg × ${r.weight} kg = ${r.rawBolus} units; sample cap ${r.bolusCap} units → ${r.bolus} units. The preparation concentration is not used for bolus volume.`,
     r.noChange ? `No change: keep the current ${r.current} units/h without rounding. No new pump setting.` :
-      `${r.current === null ? '' : `${r.current} units/h + `}(${r.factor} units/kg/h × ${r.weight} kg) = ${r.rawRate} units/h. Round to nearest 10 → ${r.roundedRate} units/h${r.capped ? `; apply starting cap → ${r.doseRate} units/h` : ''}.`,
-    r.noChange ? '' : `${r.doseRate} units/h ÷ ${r.concentration} units/mL, rounded to 0.1 mL/h → ${r.pumpRate.toFixed(1)} mL/h (${r.delivered} units/h delivered at pump precision).`,
-  ].filter(Boolean);
-  el('breakdown').replaceChildren(...lines.map((text) => {
+      `${r.current === null ? '' :` $${r.current} units/h + `}($${r.factor} units/kg/h × ${r.weight} kg) = ${r.rawRate} units/h. Round to nearest 10 → $${r.roundedRate} units/h$${r.capped ? `; apply starting cap → ${r.doseRate} units/h` : ''}.`,     r.noChange ? '' :` ${r.doseRate} units/h ÷ the exact preparation concentration, rounded to 0.1 mL/h → $${r.pumpRate.toFixed(1)} mL/h ($${r.deliveredText} units/h at pump precision).\`,
+  \].filter(Boolean);
+  el('breakdown').replaceChildren(...lines.map((text) =&gt; {
     const li = document.createElement('li');
     li.textContent = text;
     return li;
@@ -133,7 +150,7 @@ form.addEventListener('submit', (event) => {
   el('result-title').focus();
 });
 
-el('copy').addEventListener('click', async () => {
+el('copy').addEventListener('click', async () =&gt; {
   const captured = snapshot;
   if (!captured) return;
   try {
