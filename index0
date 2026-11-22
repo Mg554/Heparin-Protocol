@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heparin Infusion Protocol - Merged Secure v2.0</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#e63946">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Heparin">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<!-- SECURITY: No external fonts. System fonts only, works offline, no third-party tracking. -->
+<!-- PROTOCOL VERSION: v2.0-merged-secure. Source: index.html kept as base, index-updated.html was empty (1 blank line). Verify all protocol values against your hospital protocol before clinical use. -->
+<style>
+  :root{--red:#e63946;--orange:#f4a261;--green:#2a9d8f;--blue:#1d3557;--light:#f1faee;--yellow:#ffd166;--dark:#0d1b2a;--card:#132133;--border:#1e3a5f;--text:#e8f4fd;--muted:#7ba7c8}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--dark);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+  header{background:linear-gradient(135deg,#0d1b2a 0%,#132133 100%);border-bottom:2px solid var(--red);padding:16px 16px 12px;position:sticky;top:0;z-index:100}
+  .header-top{display:flex;align-items:center;gap:10px}
+  .logo{width:40px;height:40px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+  h1{font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:700;letter-spacing:1px;color:var(--light)}
+  .subtitle{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-top:2px}
+  .warning-bar{background:rgba(230,57,70,.15);border:1px solid rgba(230,57,70,.4);border-radius:6px;padding:6px 10px;margin-top:10px;font-size:11px;color:#ff9999;text-align:center}
+  .version-bar{background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.4);border-radius:6px;padding:6px 10px;margin-top:8px;font-size:11px;color:var(--yellow);text-align:center}
+  .tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:1;min-width:70px;padding:12px 8px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;text-align:center}
+  .tab.active{color:var(--red);border-bottom-color:var(--red);background:rgba(230,57,70,.08)}
+  .content{padding:16px;display:none}
+  .content.active{display:block}
+  .section-title{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;margin-top:20px;display:flex;align-items:center;gap:8px}
+  .section-title:first-child{margin-top:0}
+  .section-title::before{content:'';display:block;width:20px;height:2px;background:var(--red)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}
+  .card-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:ui-monospace,Menlo,monospace;margin-bottom:6px}
+  .card-value{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;color:var(--yellow)}
+  .input-group{margin-bottom:14px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:700}
+  input[type="number"],select{width:100%;background:var(--dark);border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-size:16px;font-family:ui-monospace,Menlo,monospace}
+  input[type="number"]:focus,select:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(230,57,70,.15)}
+  input.invalid{border-color:var(--red);box-shadow:0 0 0 3px rgba(230,57,70,.2)}
+  select option{background:var(--dark)}
+  .btn{width:100%;padding:14px;background:var(--red);border:none;border-radius:10px;color:white;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;letter-spacing:.5px;margin-top:6px}
+  .btn:active{transform:scale(.98);background:#c1121f}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn-secondary{background:transparent;border:1.5px solid var(--border);color:var(--muted)}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .result-item{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:12px}
+  .result-item.highlight{border-color:var(--yellow);background:rgba(255,209,102,.08)}
+  .result-item.full{grid-column:1/-1}
+  .result-label{font-size:10px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .result-val{font-family:ui-monospace,Menlo,monospace;font-size:20px;font-weight:700;color:var(--yellow)}
+  .result-sub{font-size:10px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-top:2px}
+  .titration-result{background:var(--card);border:2px solid var(--green);border-radius:12px;padding:16px;margin-top:16px;display:none}
+  .titration-result.show{display:block}
+  .titration-action{font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border);line-height:1.5}
+  .action-stop{color:var(--red)}.action-increase{color:var(--orange)}.action-decrease{color:var(--yellow)}.action-hold{color:var(--green)}
+  .ref-table{width:100%;border-collapse:collapse;font-size:12px;font-family:ui-monospace,Menlo,monospace;margin-top:6px}
+  .ref-table th{background:rgba(29,53,87,.8);padding:8px 6px;text-align:center;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border)}
+  .ref-table td{padding:9px 6px;text-align:center;border-bottom:1px solid rgba(30,58,95,.5);color:var(--text);font-size:11px}
+  .ref-table tr.therapeutic td{background:rgba(42,157,143,.1)}
+  .badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase}
+  .badge-hold{background:var(--green);color:#fff}.badge-stop{background:var(--red);color:#fff}.badge-up{background:var(--orange);color:#000}.badge-dn{background:var(--yellow);color:#000}
+  .step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+  .step-num{width:28px;height:28px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;font-family:ui-monospace,Menlo,monospace}
+  .step-content{flex:1;padding-top:3px}.step-title{font-weight:700;font-size:14px;margin-bottom:4px}.step-desc{font-size:12px;color:var(--muted);line-height:1.6}
+  .step-desc code{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;color:var(--yellow);font-size:11px}
+  hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+  .conc-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .conc-badge{flex:1;min-width:100px;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;border-top:3px solid transparent}
+  .conc-badge.selected{border-top-color:var(--red);background:rgba(230,57,70,.1)}
+  .conc-badge .val{font-family:ui-monospace,Menlo,monospace;font-size:14px;font-weight:700;color:var(--yellow)}
+  .conc-badge .lbl{font-size:10px;color:var(--muted);margin-top:2px}
+  .alert{border-radius:8px;padding:10px 14px;font-size:12px;line-height:1.6;margin-bottom:10px}
+  .alert-red{background:rgba(230,57,70,.12);border-left:3px solid var(--red);color:#ffaaaa}
+  .alert-green{background:rgba(42,157,143,.12);border-left:3px solid var(--green);color:#99ddd6}
+  .alert-yellow{background:rgba(255,209,102,.1);border-left:3px solid var(--yellow);color:#ffd166}
+  .proto-select{display:flex;gap:8px;margin-bottom:12px}
+  .proto-btn{flex:1;padding:10px 6px;background:var(--dark);border:1.5px solid var(--border);border-radius:8px;color:var(--muted);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center}
+  .proto-btn.active{background:rgba(230,57,70,.15);border-color:var(--red);color:var(--red)}
+  .timeline{position:relative;padding-right:20px}
+  .timeline::before{content:'';position:absolute;right:9px;top:6px;bottom:6px;width:2px;background:var(--border)}
+  .tl-item{position:relative;margin-bottom:16px;padding-right:26px}
+  .tl-item::before{content:'';position:absolute;right:3px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--red);border:2px solid var(--dark);z-index:1}
+  .tl-item.done::before{background:var(--green)}
+  .tl-time{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--red);font-weight:700}
+  .tl-text{font-size:13px;margin-top:2px;line-height:1.5}.tl-sub{font-size:11px;color:var(--muted);margin-top:2px;font-family:ui-monospace,Menlo,monospace}
+  .scroll-hint{text-align:center;font-size:10px;color:rgba(123,167,200,.4);padding:8px;font-family:ui-monospace,Menlo,monospace}
+  .error-box{display:none;background:rgba(230,57,70,.15);border:1px solid var(--red);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.6;margin-bottom:12px;color:#ffcccc}
+  .error-box.show{display:block}
+  .review-box{display:none;background:rgba(42,157,143,.1);border:1px solid var(--green);border-radius:8px;padding:12px;font-size:13px;line-height:1.6;margin-bottom:12px}
+  .review-box.show{display:block}
+  .confirm-row{display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-size:13px;line-height:1.5}
+  .confirm-row input{width:20px;height:20px;flex-shrink:0;margin-top:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top"><div class="logo" aria-hidden="true">💉</div><div><h1>HEPARIN DRIP PROTOCOL</h1><div class="subtitle">Weight-Based IV UFH Nomogram (Raschke)</div></div></div>
+  <div class="warning-bar">⚠️ للاستخدام المرجعي فقط، دائما راجع بروتوكول مستشفاك</div>
+  <div class="version-bar">نسخة مدمجة ومؤمنة v2.0، الملف الثاني كان فارغا وتم حذفه من الدمج، راجع القيم الطبية مع الصيدلي قبل الاستخدام</div>
+</header>
+<nav class="tabs" role="tablist" aria-label="أقسام التطبيق">
+  <button class="tab active" data-tab="init" role="tab" aria-selected="true">🚀 البدء</button>
+  <button class="tab" data-tab="titrate" role="tab" aria-selected="false">📊 Titration</button>
+  <button class="tab" data-tab="nomogram" role="tab" aria-selected="false">📋 Nomogram</button>
+  <button class="tab" data-tab="monitor" role="tab" aria-selected="false">⏱️ متابعة</button>
+</nav>
+
+<!-- TAB 1 -->
+<div id="tab-init" class="content active">
+  <div class="section-title">اختر البروتوكول</div>
+  <div class="proto-select" id="proto-group">
+    <button class="proto-btn active" data-proto="vte">DVT/PE<br><small style="font-size:9px">aPTT 60 to 100s</small></button>
+    <button class="proto-btn" data-proto="acs">ACS/NSTEMI<br><small style="font-size:9px">aPTT 50 to 70s</small></button>
+    <button class="proto-btn" data-proto="high">High Risk<br><small style="font-size:9px">No Bolus</small></button>
+  </div>
+  <div class="section-title">بيانات المريض</div>
+  <div id="init-error" class="error-box" role="alert" aria-live="polite"></div>
+  <div class="input-group"><label for="weight">الوزن (kg)</label><input type="number" id="weight" placeholder="مثال: 70" min="30" max="200" step="0.5" inputmode="decimal" autocomplete="off"></div>
+  <div class="section-title">تركيز المحلول</div>
+  <div class="conc-row" id="conc-group">
+    <div class="conc-badge selected" data-conc="50" data-id="conc1" role="button" tabindex="0" aria-pressed="true"><div class="val">50</div><div class="lbl">units/mL</div><div class="lbl">25K/500mL</div></div>
+    <div class="conc-badge" data-conc="100" data-id="conc2" role="button" tabindex="0" aria-pressed="false"><div class="val">100</div><div class="lbl">units/mL</div><div class="lbl">25K/250mL</div></div>
+    <div class="conc-badge" data-conc="40" data-id="conc3" role="button" tabindex="0" aria-pressed="false"><div class="val">40</div><div class="lbl">units/mL</div><div class="lbl">20K/500mL</div></div>
+  </div>
+  <div id="init-review" class="review-box" aria-live="polite"></div>
+  <label class="confirm-row"><input type="checkbox" id="init-confirm"><span>راجعت الوزن والبروتوكول والتركيز، وأعرف أن النتيجة لازم تتراجع مع بروتوكول المستشفى.</span></label>
+  <button class="btn" id="btn-calc-initial" type="button">احسب الجرعة الأولية</button>
+  <div id="init-results" style="display:none; margin-top:16px;">
+    <div class="section-title">النتيجة</div>
+    <div class="result-grid">
+      <div class="result-item highlight full"><div class="result-label">Bolus Dose</div><div class="result-val" id="res-bolus">—</div><div class="result-sub" id="res-bolus-ml">—</div></div>
+      <div class="result-item"><div class="result-label">Initial Rate</div><div class="result-val" id="res-rate-uhr">—</div><div class="result-sub">units/hr</div></div>
+      <div class="result-item"><div class="result-label">Pump Rate</div><div class="result-val" id="res-rate-ml">—</div><div class="result-sub">mL/hr</div></div>
+      <div class="result-item full"><div class="result-label">units/kg/hr</div><div class="result-val" id="res-rate-kghr">—</div><div class="result-sub" id="res-target-range">—</div></div>
+    </div>
+    <div class="alert alert-yellow" id="bolus-note"></div>
+    <div class="alert alert-green">✅ اسحب aPTT بعد <strong>6 ساعات</strong> من البدء</div>
+  </div>
+</div>
+
+<!-- TAB 2 -->
+<div id="tab-titrate" class="content">
+  <div class="section-title">بيانات للتعديل</div>
+  <div class="proto-select" id="tit-proto-group">
+    <button class="proto-btn active" data-titproto="vte">DVT/PE<br><small style="font-size:9px">60 to 100s</small></button>
+    <button class="proto-btn" data-titproto="acs">ACS<br><small style="font-size:9px">50 to 70s</small></button>
+  </div>
+  <div id="tit-error" class="error-box" role="alert" aria-live="polite"></div>
+  <div class="input-group"><label for="tit-weight">وزن المريض (kg)</label><input type="number" id="tit-weight" placeholder="مثال: 70" min="30" max="200" inputmode="decimal" autocomplete="off"></div>
+  <div class="input-group"><label for="aptt-val">الـ aPTT الحالي (ثانية)</label><input type="number" id="aptt-val" placeholder="مثال: 45" min="10" max="300" inputmode="decimal" autocomplete="off"></div>
+  <div id="zone-hint" style="display:none; margin-bottom:10px;"></div>
+  <div class="input-group"><label for="current-rate">معدل الـ Infusion الحالي (units/hr)</label><input type="number" id="current-rate" placeholder="مثال: 1260" min="0" max="5000" inputmode="decimal" autocomplete="off"></div>
+  <div class="section-title">تركيز المحلول</div>
+  <div class="conc-row" id="tit-conc-group">
+    <div class="conc-badge selected" data-tconc="50" role="button" tabindex="0" aria-pressed="true"><div class="val">50</div><div class="lbl">units/mL</div></div>
+    <div class="conc-badge" data-tconc="100" role="button" tabindex="0" aria-pressed="false"><div class="val">100</div><div class="lbl">units/mL</div></div>
+    <div class="conc-badge" data-tconc="40" role="button" tabindex="0" aria-pressed="false"><div class="val">40</div><div class="lbl">units/mL</div></div>
+  </div>
+  <div id="tit-review" class="review-box" aria-live="polite"></div>
+  <label class="confirm-row"><input type="checkbox" id="tit-confirm"><span>راجعت الوزن ونتيجة الفحص والمعدل الحالي والتركيز.</span></label>
+  <button class="btn" id="btn-calc-titration" type="button">احسب التعديل</button>
+  <div id="titration-result" class="titration-result">
+    <div class="result-label" style="margin-bottom:8px">📋 ORDER</div>
+    <div id="tit-action" class="titration-action"></div>
+    <div class="result-grid" style="margin-top:0">
+      <div class="result-item" id="tit-bolus-card" style="display:none"><div class="result-label">Bolus</div><div class="result-val" id="tit-bolus-val">—</div><div class="result-sub">units IV now</div></div>
+      <div class="result-item highlight"><div class="result-label">New Rate</div><div class="result-val" id="tit-new-rate">—</div><div class="result-sub">units/hr</div></div>
+      <div class="result-item"><div class="result-label">Pump Rate</div><div class="result-val" id="tit-ml-rate">—</div><div class="result-sub">mL/hr</div></div>
+      <div class="result-item full"><div class="result-label">Next aPTT Check</div><div id="tit-next-check" style="font-family:ui-monospace,Menlo,monospace; font-size:14px; color:var(--green); font-weight:700;">—</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3 -->
+<div id="tab-nomogram" class="content">
+  <div class="section-title">DVT/PE Protocol، Target aPTT: 60 to 100s</div>
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="ref-table"><thead><tr><th>aPTT (sec)</th><th>Bolus</th><th>Rate Change</th><th>Hold</th><th>Next Check</th></tr></thead><tbody>
+      <tr><td style="color:var(--red)"><strong>اقل من 40</strong></td><td><span class="badge badge-up">80 u/kg</span><br><small style="color:var(--muted)">max 5000u</small></td><td style="color:var(--orange)">+3 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr><td style="color:var(--orange)"><strong>40 إلى 49</strong></td><td><span class="badge badge-up">40 u/kg</span><br><small style="color:var(--muted)">max 3000u</small></td><td style="color:var(--orange)">+2 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr><td style="color:var(--orange)"><strong>50 إلى 59</strong></td><td>لا</td><td style="color:var(--orange)">+1 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr class="therapeutic"><td style="color:var(--green)"><strong>60 إلى 100</strong></td><td>لا</td><td style="color:var(--green)">لا تغيير</td><td>لا</td><td>6h ثم 12h</td></tr>
+      <tr><td style="color:var(--yellow)"><strong>101 إلى 120</strong></td><td>لا</td><td style="color:var(--yellow)">ناقص 1 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr><td style="color:var(--orange)"><strong>121 إلى 150</strong></td><td>لا</td><td style="color:var(--orange)">ناقص 2 u/kg/h</td><td>وقف 30 دق</td><td>6h</td></tr>
+      <tr><td style="color:var(--red)"><strong>اكثر من 150</strong></td><td>لا</td><td style="color:var(--red)">ناقص 3 u/kg/h</td><td>وقف 60 دق</td><td>6h</td></tr>
+    </tbody></table>
+    <div class="scroll-hint">بعد نتيجتين متتاليتين Therapeutic، فحص كل 12 ساعة</div>
+  </div>
+  <div class="section-title" style="margin-top:20px">ACS/NSTEMI Protocol، Target aPTT: 50 to 70s</div>
+  <div class="card" style="padding:0; overflow:hidden;">
+    <table class="ref-table"><thead><tr><th>aPTT (sec)</th><th>Bolus</th><th>Rate Change</th><th>Hold</th><th>Next</th></tr></thead><tbody>
+      <tr><td style="color:var(--red)"><strong>اقل من 40</strong></td><td><span class="badge badge-up">60 u/kg</span><br><small>max 4000u</small></td><td style="color:var(--orange)">+2 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr><td style="color:var(--orange)"><strong>40 إلى 49</strong></td><td>لا</td><td style="color:var(--orange)">+1 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr class="therapeutic"><td style="color:var(--green)"><strong>50 إلى 70</strong></td><td>لا</td><td style="color:var(--green)">لا تغيير</td><td>لا</td><td>12h</td></tr>
+      <tr><td style="color:var(--yellow)"><strong>71 إلى 90</strong></td><td>لا</td><td style="color:var(--yellow)">ناقص 1 u/kg/h</td><td>لا</td><td>6h</td></tr>
+      <tr><td style="color:var(--orange)"><strong>91 إلى 120</strong></td><td>لا</td><td style="color:var(--orange)">ناقص 2 u/kg/h</td><td>وقف 30 دق</td><td>6h</td></tr>
+      <tr><td style="color:var(--red)"><strong>اكثر من 120</strong></td><td>لا</td><td style="color:var(--red)">ناقص 3 u/kg/h</td><td>وقف 60 دق</td><td>6h</td></tr>
+    </tbody></table>
+  </div>
+  <div class="section-title">ملاحظات مهمة</div>
+  <div class="alert alert-red">🔴 <strong>Heparin Resistance:</strong> إذا احتجت جرعة يومية عالية جدا للوصول للهدف، فكر بمراقبة بديلة أو نقص مضاد الثرومبين، راجع بروتوكول المستشفى</div>
+  <div class="alert alert-yellow">⚠️ <strong>HIT:</strong> راقب تعداد الدم الكامل كل 2 إلى 3 أيام، إذا انخفضت الصفائح بشكل كبير، وقف فورا وراجع الطبيب</div>
+  <div class="alert alert-green">✅ <strong>Anti-Xa Alternative:</strong> هدف 0.3 إلى 0.7 IU/mL، أدق من aPTT خاصة في المرضى الصعبين</div>
+  <div class="section-title">Initial Dosing Quick Ref</div>
+  <div class="card"><table class="ref-table"><thead><tr><th>Indication</th><th>Bolus</th><th>Initial Rate</th></tr></thead><tbody>
+    <tr><td>DVT/PE</td><td>80 u/kg</td><td>18 u/kg/h</td></tr>
+    <tr><td>ACS/NSTEMI</td><td>60 u/kg<br><small style="color:var(--muted)">max 4000u</small></td><td>12 u/kg/h<br><small style="color:var(--muted)">max 1000u/h</small></td></tr>
+    <tr><td>High Bleed Risk</td><td style="color:var(--red)">بدون بولس</td><td>18 u/kg/h</td></tr>
+  </tbody></table></div>
+</div>
+
+<!-- TAB 4 -->
+<div id="tab-monitor" class="content">
+  <div class="section-title">جدول المتابعة القياسي</div>
+  <div class="timeline">
+    <div class="tl-item done"><div class="tl-time">T = 0</div><div class="tl-text">ابدأ الـ Heparin Infusion</div><div class="tl-sub">Bolus IV ثم ابدأ المحلول</div></div>
+    <div class="tl-item"><div class="tl-time">T + 6 ساعات</div><div class="tl-text">أول aPTT Check</div><div class="tl-sub">عدل بناء على Nomogram</div></div>
+    <div class="tl-item"><div class="tl-time">T + 12 ساعات</div><div class="tl-text">ثاني aPTT Check</div><div class="tl-sub">إذا ما تغيرت الجرعة</div></div>
+    <div class="tl-item"><div class="tl-time">بعد أي تعديل</div><div class="tl-text">aPTT بعد 6 ساعات</div><div class="tl-sub">من كل تعديل في الجرعة</div></div>
+    <div class="tl-item"><div class="tl-time">Stable</div><div class="tl-text">2 نتيجتين Therapeutic متتاليتين</div><div class="tl-sub">انتقل لـ aPTT كل 12 ساعة (صباحي)</div></div>
+    <div class="tl-item"><div class="tl-time">اليومي</div><div class="tl-text">CBC، راقب Platelets</div><div class="tl-sub">كل 2 إلى 3 أيام للـ HIT screening</div></div>
+  </div>
+  <hr>
+  <div class="section-title">متى توقف الـ Heparin؟</div>
+  <div class="step"><div class="step-num">!</div><div class="step-content"><div class="step-title" style="color:var(--red)">Bleeding Major</div><div class="step-desc">وقف فوري، دواء الإبطال للـ reversal إذا لزم<br><code>1mg protamine : 100u heparin في آخر ساعتين</code></div></div></div>
+  <div class="step"><div class="step-num">!</div><div class="step-content"><div class="step-title" style="color:var(--orange)">HIT مشتبه</div><div class="step-desc">وقف فوري + ابدأ بديل مباشر حسب بروتوكول المستشفى<br><code>لا تعط LMWH أو warfarin فورا</code></div></div></div>
+  <div class="step"><div class="step-num">✓</div><div class="step-content"><div class="step-title" style="color:var(--green)">Transition to Oral</div><div class="step-desc">Overlap مع Warfarin/DOAC حتى INR اكثر من 2.0 لمدة 24h قبل إيقاف الهيبارين</div></div></div>
+  <hr>
+  <div class="section-title">Protamine Reversal</div>
+  <div class="card">
+    <div id="prot-error" class="error-box" role="alert" aria-live="polite"></div>
+    <div class="input-group"><label for="prot-hep">آخر جرعة هيبارين (units)</label><input type="number" id="prot-hep" placeholder="مثال: 1000 u/hr في ساعتين = 2000" min="0" max="50000" inputmode="decimal" autocomplete="off"></div>
+    <button class="btn btn-secondary" id="btn-calc-protamine" type="button">احسب Protamine</button>
+    <div id="prot-result" style="margin-top:12px; display:none;"><div class="alert alert-yellow"><strong>Protamine Dose:</strong> <span id="prot-dose" style="font-family:ui-monospace,Menlo,monospace; font-size:16px; font-weight:700;"></span> mg IV<br><small>Max 50mg per dose، أعط بطيء، راقب للـ hypotension</small><div id="prot-warn" style="margin-top:6px; font-weight:700;"></div></div></div>
+  </div>
+  <hr>
+  <div class="section-title">Target Ranges Quick Reference</div>
+  <div class="card" style="padding:0; overflow:hidden;"><table class="ref-table"><thead><tr><th>Monitoring</th><th>Subtherapeutic</th><th>Therapeutic</th><th>Supratherapeutic</th></tr></thead><tbody>
+    <tr><td>aPTT (DVT/PE)</td><td style="color:var(--orange)">اقل من 60s</td><td style="color:var(--green)">60 إلى 100s</td><td style="color:var(--red)">اكثر من 100s</td></tr>
+    <tr><td>aPTT (ACS)</td><td style="color:var(--orange)">اقل من 50s</td><td style="color:var(--green)">50 إلى 70s</td><td style="color:var(--red)">اكثر من 70s</td></tr>
+    <tr><td>Anti-Xa</td><td style="color:var(--orange)">اقل من 0.3</td><td style="color:var(--green)">0.3 إلى 0.7 IU/mL</td><td style="color:var(--red)">اكثر من 0.7</td></tr>
+  </tbody></table></div>
+</div>
+
+<script>
+'use strict';
+// MERGED + SECURED: single source of truth for protocol values. Verify against hospital protocol.
+const APP_VERSION = 'v2.0-merged-secure';
+const LIMITS = { weightMin: 30, weightMax: 200, apttMin: 10, apttMax: 300, rateMin: 0, rateMax: 5000, protHeparinMin: 0, protHeparinMax: 50000 };
+const protocols = {
+  vte:  { bolusDose: 80, maxBolus: 5000, infRate: 18, targetLow: 60, targetHigh: 100, label: 'DVT/PE' },
+  acs:  { bolusDose: 60, maxBolus: 4000, infRate: 12, targetLow: 50, targetHigh: 70, label: 'ACS/NSTEMI' },
+  high: { bolusDose: 0,  maxBolus: 0,    infRate: 18, targetLow: 60, targetHigh: 100, label: 'High Risk' }
+};
+const nomograms = {
+  vte: [
+    { maxAptt: 39,  bolus: 80, maxBolus: 5000, rateChange: 3, hold: 0, label: 'Subtherapeutic - Critical Low' },
+    { maxAptt: 49,  bolus: 40, maxBolus: 3000, rateChange: 2, hold: 0, label: 'Subtherapeutic - Low' },
+    { maxAptt: 59,  bolus: 0,  maxBolus: 0,    rateChange: 1, hold: 0, label: 'Subtherapeutic - Borderline' },
+    { maxAptt: 100, bolus: 0,  maxBolus: 0,    rateChange: 0,  hold: 0, label: 'THERAPEUTIC' },
+    { maxAptt: 120, bolus: 0,  maxBolus: 0,    rateChange: -1, hold: 0, label: 'Supratherapeutic - Mild' },
+    { maxAptt: 150, bolus: 0,  maxBolus: 0,    rateChange: -2, hold: 30, label: 'Supratherapeutic - Moderate' },
+    { maxAptt: 9999,bolus: 0,  maxBolus: 0,    rateChange: -3, hold: 60, label: 'Supratherapeutic - CRITICAL' }
+  ],
+  acs: [
+    { maxAptt: 39,  bolus: 60, maxBolus: 4000, rateChange: 2, hold: 0, label: 'Subtherapeutic - Critical Low' },
+    { maxAptt: 49,  bolus: 0,  maxBolus: 0,    rateChange: 1, hold: 0, label: 'Subtherapeutic - Low' },
+    { maxAptt: 70,  bolus: 0,  maxBolus: 0,    rateChange: 0,  hold: 0, label: 'THERAPEUTIC' },
+    { maxAptt: 90,  bolus: 0,  maxBolus: 0,    rateChange: -1, hold: 0, label: 'Supratherapeutic - Mild' },
+    { maxAptt: 120, bolus: 0,  maxBolus: 0,    rateChange: -2, hold: 30, label: 'Supratherapeutic - Moderate' },
+    { maxAptt: 9999,bolus: 0,  maxBolus: 0,    rateChange: -3, hold: 60, label: 'Supratherapeutic - CRITICAL' }
+  ]
+};
+let currentProto = 'vte';
+let currentConc = 50;
+let titCurrentConc = 50;
+let titProto = 'vte';
+
+function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent=value; }
+function showError(id, msg){ const el=document.getElementById(id); if(!el) return; if(msg){ el.textContent=msg; el.classList.add('show'); } else { el.textContent=''; el.classList.remove('show'); } }
+function markInvalid(input, isInvalid){ if(input) input.classList.toggle('invalid', !!isInvalid); }
+function parseStrict(value, min, max){
+  if(value===null || value===undefined) return { ok:false };
+  const trimmed=String(value).trim();
+  if(trimmed==='') return { ok:false };
+  const n=Number(trimmed);
+  if(!Number.isFinite(n)) return { ok:false };
+  if(n<min || n>max) return { ok:false, outOfRange:true, value:n };
+  return { ok:true, value:n };
+}
+function round10(n){ return Math.round(n/10)*10; }
+function formatNum(n){ return Number(n).toLocaleString('en-US'); }
+
+function switchTab(name, btn){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>{ t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+  const panel=document.getElementById('tab-'+name); if(panel) panel.classList.add('active');
+  if(btn){ btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+}
+function clearInitResults(){ const el=document.getElementById('init-results'); if(el) el.style.display='none'; }
+
+function calcInitial(){
+  const input=document.getElementById('weight');
+  const parsed=parseStrict(input.value, LIMITS.weightMin, LIMITS.weightMax);
+  const confirmBox=document.getElementById('init-confirm');
+  if(!parsed.ok){ markInvalid(input,true); showError('init-error', parsed.outOfRange ? 'الوزن لازم يكون بين 30 و 200 كغ. راجع الرقم قبل الحساب.' : 'أدخل وزن صحيح بين 30 و 200 كغ.'); return; }
+  if(!confirmBox || !confirmBox.checked){ showError('init-error','فعّل مربع المراجعة بعد ما تتأكد من الوزن والبروتوكول والتركيز.'); return; }
+  markInvalid(input,false); showError('init-error','');
+  const wt=parsed.value;
+  const proto=protocols[currentProto];
+  let bolusUnits=0; let bolusNote='';
+  if(proto.bolusDose>0){
+    const rawBolus=proto.bolusDose*wt;
+    bolusUnits=Math.min(rawBolus, proto.maxBolus);
+    if(rawBolus>proto.maxBolus){ bolusNote='تنبيه: الجرعة المحسوبة تجاوزت الحد الأقصى، تم تطبيق الحد الأقصى. راجع بروتوكول المستشفى.'; } else { bolusNote='الجرعة الكاملة بحسب الوزن.'; }
+  } else { bolusNote='بروتوكول High Risk، بدون Bolus.'; }
+  const rateUhr=round10(proto.infRate*wt);
+  const rateML=(rateUhr/currentConc).toFixed(1);
+  const bolusML=(bolusUnits/currentConc).toFixed(1);
+  setText('res-bolus', bolusUnits>0 ? formatNum(bolusUnits)+' units' : 'لا يوجد');
+  setText('res-bolus-ml', bolusUnits>0 ? '= '+bolusML+' mL IV over 3 to 5 min' : 'High Risk Protocol');
+  setText('res-rate-uhr', formatNum(rateUhr));
+  setText('res-rate-ml', rateML);
+  setText('res-rate-kghr', proto.infRate+' u/kg/hr');
+  setText('res-target-range', 'Target aPTT: '+proto.targetLow+' to '+proto.targetHigh+' sec ('+proto.label+')');
+  setText('bolus-note', bolusNote);
+  const res=document.getElementById('init-results'); res.style.display='block';
+  res.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function showZoneHint(){
+  const apttInput=document.getElementById('aptt-val');
+  const parsed=parseStrict(apttInput.value, LIMITS.apttMin, LIMITS.apttMax);
+  const hint=document.getElementById('zone-hint');
+  if(!parsed.ok){ hint.style.display='none'; return; }
+  const zone=nomograms[titProto].find(z=>parsed.value<=z.maxAptt);
+  if(!zone){ hint.style.display='none'; return; }
+  let cls='alert alert-yellow';
+  if(zone.rateChange===0) cls='alert alert-green';
+  else if(zone.rateChange>1 || zone.hold>0) cls='alert alert-red';
+  hint.className=cls;
+  hint.textContent=zone.label;
+  hint.style.display='block';
+}
+function calcTitration(){
+  const wtInput=document.getElementById('tit-weight');
+  const apttInput=document.getElementById('aptt-val');
+  const rateInput=document.getElementById('current-rate');
+  const confirmBox=document.getElementById('tit-confirm');
+  const wtP=parseStrict(wtInput.value, LIMITS.weightMin, LIMITS.weightMax);
+  const apttP=parseStrict(apttInput.value, LIMITS.apttMin, LIMITS.apttMax);
+  const rateP=parseStrict(rateInput.value, LIMITS.rateMin, LIMITS.rateMax);
+  markInvalid(wtInput, !wtP.ok); markInvalid(apttInput, !apttP.ok); markInvalid(rateInput, !rateP.ok);
+  if(!wtP.ok || !apttP.ok || !rateP.ok){ showError('tit-error','أدخل كل البيانات بشكل صحيح: الوزن بين 30 و 200، نتيجة الفحص بين 10 و 300، المعدل الحالي بين 0 و 5000.'); return; }
+  if(!confirmBox || !confirmBox.checked){ showError('tit-error','فعّل مربع المراجعة بعد ما تتأكد من كل المدخلات.'); return; }
+  showError('tit-error','');
+  const wt=wtP.value, aptt=apttP.value, currRate=rateP.value;
+  const zone=nomograms[titProto].find(z=>aptt<=z.maxAptt); if(!zone) return;
+  let bolusUnits=0;
+  let bolusLine='';
+  if(zone.bolus>0){ bolusUnits=Math.min(zone.bolus*wt, zone.maxBolus); bolusLine='أعط Bolus: '+formatNum(bolusUnits)+' units IV ('+(bolusUnits/titCurrentConc).toFixed(1)+' mL)'; }
+  const rateChange=zone.rateChange*wt;
+  let newRateUhr=round10(currRate+rateChange);
+  let clamped=false;
+  if(newRateUhr<0){ newRateUhr=0; clamped=true; }
+  const newRateML=(newRateUhr/titCurrentConc).toFixed(1);
+  const nextCheck=zone.rateChange===0 ? 'بعد 6 ساعات (ثم 12h إذا ثاني نتيجة therapeutic)' : 'بعد 6 ساعات';
+  const actionEl=document.getElementById('tit-action');
+  actionEl.textContent='';
+  function addLine(text, cls){
+    const div=document.createElement('div'); div.textContent=text; if(cls) div.className=cls; actionEl.appendChild(div);
+  }
+  if(zone.hold>0) addLine('أوقف الـ infusion لمدة '+zone.hold+' دقيقة، ثم ابدأ بالمعدل الجديد', 'action-stop');
+  if(bolusLine) addLine(bolusLine, 'action-increase');
+  if(zone.rateChange===0){ addLine('لا تغيير في المعدل، '+zone.label, 'action-hold'); }
+  else { addLine((zone.rateChange>0 ? 'زيادة بمقدار ' : 'تخفيض بمقدار ')+Math.abs(zone.rateChange)+' u/kg/h', zone.rateChange>0 ? 'action-increase' : 'action-decrease'); addLine('المعدل الجديد: '+formatNum(newRateUhr)+' units/hr ('+newRateML+' mL/hr)', 'action-hold'); }
+  if(clamped) addLine('تنبيه: المعدل الجديد كان سالبا وتم تثبيته على صفر. راجع الطبيب فورا.', 'action-stop');
+  setText('tit-new-rate', formatNum(newRateUhr));
+  setText('tit-ml-rate', newRateML);
+  setText('tit-next-check', nextCheck);
+  const bolusCard=document.getElementById('tit-bolus-card');
+  if(bolusUnits>0){ setText('tit-bolus-val', formatNum(bolusUnits)); bolusCard.style.display='block'; } else { bolusCard.style.display='none'; }
+  const result=document.getElementById('titration-result');
+  result.style.borderColor=zone.rateChange===0 ? 'var(--green)' : zone.hold>0 ? 'var(--red)' : 'var(--orange)';
+  result.classList.add('show');
+  result.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function calcProtamine(){
+  const input=document.getElementById('prot-hep');
+  const parsed=parseStrict(input.value, LIMITS.protHeparinMin, LIMITS.protHeparinMax);
+  if(!parsed.ok){ markInvalid(input,true); showError('prot-error','أدخل كمية هيبارين صحيحة بين 0 و 50000 وحدة.'); return; }
+  markInvalid(input,false); showError('prot-error','');
+  let dose=parsed.value/100;
+  let capped=false;
+  if(dose>50){ dose=50; capped=true; }
+  setText('prot-dose', dose.toFixed(1));
+  setText('prot-warn', capped ? 'تنبيه: تم تطبيق الحد الأقصى 50mg. راجع بروتوكول المستشفى.' : '');
+  document.getElementById('prot-result').style.display='block';
+}
+function updateInitReview(){
+  const p=parseStrict(document.getElementById('weight').value, LIMITS.weightMin, LIMITS.weightMax);
+  const box=document.getElementById('init-review');
+  if(!p.ok){ box.classList.remove('show'); return; }
+  box.textContent='مراجعة: الوزن '+p.value+' كغ، البروتوكول '+protocols[currentProto].label+'، التركيز '+currentConc+' units/mL.';
+  box.classList.add('show');
+}
+function updateTitReview(){
+  const w=parseStrict(document.getElementById('tit-weight').value, LIMITS.weightMin, LIMITS.weightMax);
+  const a=parseStrict(document.getElementById('aptt-val').value, LIMITS.apttMin, LIMITS.apttMax);
+  const r=parseStrict(document.getElementById('current-rate').value, LIMITS.rateMin, LIMITS.rateMax);
+  const box=document.getElementById('tit-review');
+  if(!w.ok && !a.ok && !r.ok){ box.classList.remove('show'); return; }
+  box.textContent='مراجعة: الوزن '+(w.ok?w.value:'؟')+'، الفحص '+(a.ok?a.value:'؟')+'، المعدل '+(r.ok?r.value:'؟')+'، التركيز '+titCurrentConc+'.';
+  box.classList.add('show');
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click', ()=>switchTab(btn.dataset.tab, btn)));
+  document.querySelectorAll('#proto-group [data-proto]').forEach(btn=>btn.addEventListener('click', ()=>{
+    currentProto=btn.dataset.proto;
+    document.querySelectorAll('#proto-group .proto-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); clearInitResults();
+  }));
+  document.querySelectorAll('#tit-proto-group [data-titproto]').forEach(btn=>btn.addEventListener('click', ()=>{
+    titProto=btn.dataset.titproto;
+    document.querySelectorAll('#tit-proto-group .proto-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('titration-result').classList.remove('show');
+  }));
+  document.querySelectorAll('#conc-group [data-conc]').forEach(b=>{
+    function pick(){ currentConc=Number(b.dataset.conc); document.querySelectorAll('#conc-group .conc-badge').forEach(c=>{c.classList.remove('selected'); c.setAttribute('aria-pressed','false');}); b.classList.add('selected'); b.setAttribute('aria-pressed','true'); updateInitReview(); }
+    b.addEventListener('click', pick); b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); }});
+  });
+  document.querySelectorAll('#tit-conc-group [data-tconc]').forEach(b=>{
+    function pick(){ titCurrentConc=Number(b.dataset.tconc); document.querySelectorAll('#tit-conc-group .conc-badge').forEach(c=>{c.classList.remove('selected'); c.setAttribute('aria-pressed','false');}); b.classList.add('selected'); b.setAttribute('aria-pressed','true'); updateTitReview(); }
+    b.addEventListener('click', pick); b.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); }});
+  });
+  const weightInput=document.getElementById('weight'); weightInput.addEventListener('input', ()=>{ clearInitResults(); updateInitReview(); });
+  document.getElementById('btn-calc-initial').addEventListener('click', calcInitial);
+  document.getElementById('aptt-val').addEventListener('input', ()=>{ showZoneHint(); updateTitReview(); });
+  document.getElementById('tit-weight').addEventListener('input', updateTitReview);
+  document.getElementById('current-rate').addEventListener('input', updateTitReview);
+  document.getElementById('btn-calc-titration').addEventListener('click', calcTitration);
+  document.getElementById('btn-calc-protamine').addEventListener('click', calcProtamine);
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('./sw.js').then(reg=>console.log('SW registered:', reg.scope)).catch(err=>console.log('SW failed:', err));
+    });
+  }
+});
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
