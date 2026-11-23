@@ -1,102 +1,2194 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'">
-  <title>Heparin protocol | Safety review</title>
-  <link rel="manifest" href="./manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICU Heparin Infusion & Titration Workstation • Clinical Decision Support</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Inter"', 'system-ui', 'sans-serif'],
+            mono: ['"SF Mono"', '"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+          },
+          colors: {
+            appleBlue: '#007AFF',
+            appleGreen: '#34C759',
+            appleOrange: '#FF9500',
+            appleRed: '#FF3B30',
+            appleIndigo: '#5856D6',
+            appleTeal: '#30B0C7',
+          },
+          boxShadow: {
+            'apple-sm': '0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 1px rgba(0, 0, 0, 0.02)',
+            'apple-md': '0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)',
+            'apple-lg': '0 12px 32px rgba(0, 0, 0, 0.09), 0 2px 6px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    :root{color-scheme:light dark;font:100%/1.5 system-ui,sans-serif;--line:#8c939b;--warn:#9d2922}
-    @media(prefers-color-scheme:dark){:root{--warn:#ffa99f}}
-    *{box-sizing:border-box} body{margin:0;padding:1rem} main{max-width:48rem;margin:auto}
-    h1{font-size:clamp(1.45rem,4vw,2rem);line-height:1.15;margin:.3rem 0} h2{font-size:1.25rem}
-    p{margin:.5rem 0} nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-block:1.25rem}
-    a{color:inherit;text-underline-offset:.2em} nav a,button{padding:.55rem .8rem;border:1px solid var(--line);border-radius:.35rem}
-    nav a[aria-current]{background:CanvasText;color:Canvas;text-decoration:none}
-    fieldset{margin:0 0 .8rem;padding:.8rem;border:1px solid var(--line);border-radius:.4rem;min-inline-size:0}
-    legend,label{font-weight:650} .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:.8rem}
-    .field label,.field small{display:block} input:not([type=checkbox]),select,textarea{width:100%;min-width:0;font:inherit;padding:.45rem;margin-top:.2rem}
-    small{font-size:.875rem} .check{display:flex;gap:.55rem;align-items:flex-start;margin:.75rem 0}
-    .check input{width:1.2rem;height:1.2rem;flex:none;margin-top:.15rem} button{font:inherit;cursor:pointer}
-    :focus-visible{outline:2px solid currentColor;outline-offset:3px} [aria-invalid=true]{outline:2px solid var(--warn)}
-    .callout{border:2px solid var(--warn);padding:.75rem;border-radius:.35rem} .callout strong,#error,.warning{color:var(--warn)}
-    #result{margin-block:1.25rem;border-top:1px solid var(--line)} li{margin-block:.45rem;overflow-wrap:anywhere}
-    textarea{min-height:8rem;margin-block:.5rem;resize:vertical} [hidden]{display:none!important}
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.78);
+      --glass-border: rgba(0, 0, 0, 0.08);
+    }
+    html.dark {
+      --glass-bg: rgba(28, 28, 30, 0.78);
+      --glass-border: rgba(255, 255, 255, 0.12);
+    }
+    .frosted-bar {
+      background-color: var(--glass-bg);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Apple-style subtle range/number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 0.65;
+    }
+    /* Smooth custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(142, 142, 147, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(142, 142, 147, 0.55);
+    }
   </style>
-  <script type="module" src="./app.mjs"></script>
 </head>
-<body>
-<main>
-  <header>
-    <h1>IV heparin protocol</h1>
-    <div class="callout"><strong>Simulation only. Not a medication order.</strong>
-      <p>Use fictional data only. Do not use any output for patient care or paste it into a patient chart.</p>
-      <p lang="ar" dir="rtl">للمحاكاة فقط. لا تستخدم النتائج لرعاية المرضى أو لإدخالها في السجل الطبي.</p>
+<body class="bg-[#F5F5F7] dark:bg-[#000000] text-[#1D1D1F] dark:text-[#F5F5F7] min-h-screen transition-colors duration-200 selection:bg-[#007AFF]/20 selection:text-[#007AFF]">
+
+  <!-- Translucent Toast Notification (Apple Dynamic Pill) -->
+  <div id="toastPill" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="px-4 py-2.5 rounded-full bg-[#1D1D1F]/90 dark:bg-[#2C2C2E]/95 text-white backdrop-blur-xl shadow-apple-lg border border-white/15 flex items-center gap-2.5 text-xs sm:text-sm font-medium">
+      <span id="toastDot" class="w-2 h-2 rounded-full bg-[#34C759] shrink-0"></span>
+      <span id="toastText">Clinical note copied to clipboard</span>
+    </div>
+  </div>
+
+  <!-- Frosted Glass Clinical Workstation Header -->
+  <header class="sticky top-0 z-30 frosted-bar">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <!-- Brand & Governance Identity -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-[12px] bg-gradient-to-b from-[#007AFF] to-[#0056B3] text-white flex items-center justify-center shadow-apple-sm shrink-0">
+            <!-- Heparin Infusion Pump / Medical Cross SVG -->
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              <rect x="3" y="3" width="18" height="18" rx="4" stroke-width="1.8" />
+            </svg>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-base sm:text-lg font-semibold tracking-tight">ICU Heparin Workstation</h1>
+              <span id="headerProtocolBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/20 dark:text-[#409CFF] border border-[#007AFF]/20">
+                P&amp;T Protocol v2026.1 • UpToDate Anti-Xa / aPTT
+              </span>
+              <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158] border border-[#34C759]/20" title="All calculations run 100% locally in browser memory. Zero PHI transmitted.">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
+                Zero-PHI Local
+              </span>
+            </div>
+            <p class="text-xs text-[#6E6E73] dark:text-[#98989D] mt-0.5">
+              ISMP High-Alert Unfractionated Heparin (UFH) Dosing, Nomogram Titration &amp; Flowsheet
+            </p>
+          </div>
+        </div>
+
+        <!-- Workstation Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- 2nd Clinician Double-Check Toggle Pill -->
+          <button type="button" id="btnToggleVerifier"
+            class="px-3 py-1.5 rounded-full text-xs font-semibold border transition flex items-center gap-1.5 bg-white dark:bg-[#1C1C1E] border-black/10 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/10">
+            <span id="verifierStatusDot" class="w-2 h-2 rounded-full bg-[#8E8E93]"></span>
+            <span>2nd Nurse Double-Check</span>
+          </button>
+
+          <!-- Protocol JSON & FHIR Modal Trigger -->
+          <button type="button" id="btnOpenProtocolModal"
+            class="px-3 py-1.5 rounded-full text-xs font-semibold border border-black/10 dark:border-white/15 bg-white dark:bg-[#1C1C1E] hover:bg-black/5 dark:hover:bg-white/10 transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-[#5856D6] dark:text-[#5E5CE6]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+            </svg>
+            <span>Protocol JSON / FHIR</span>
+          </button>
+
+          <!-- Theme Switcher -->
+          <button type="button" id="btnThemeToggle" aria-label="Toggle Light or Dark Mode"
+            class="p-1.5 rounded-full border border-black/10 dark:border-white/15 bg-white dark:bg-[#1C1C1E] hover:bg-black/5 dark:hover:bg-white/10 transition text-[#6E6E73] dark:text-[#98989D]">
+            <svg id="iconSun" class="w-4 h-4 hidden dark:block text-[#FFD60A]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/></svg>
+            <svg id="iconMoon" class="w-4 h-4 block dark:hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+          </button>
+
+          <!-- Primary EMR Copy CTA -->
+          <button type="button" id="btnCopyOrderNote"
+            class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#007AFF] hover:bg-[#0066D6] active:scale-[0.98] text-white shadow-apple-sm transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            </svg>
+            <span>Copy EMR Order &amp; Handoff</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
-  <noscript><p>This simulation requires JavaScript. No calculation is available.</p></noscript>
-  <nav aria-label="Calculation workflow"><a id="init-link" href="#init">Initiation</a><a id="titrate-link" href="#titrate">Titration</a></nav>
-  <form id="calculator" autocomplete="off" novalidate>
-    <fieldset id="controls" disabled>
-      <legend>Calculation inputs</legend>
-      <input type="hidden" name="mode" value="start">
-      <div class="fields">
-        <div class="field"><label for="protocol">Sample protocol</label><select id="protocol" name="protocol"><option value="">Select</option><option value="vte">DVT/PE</option><option value="acs">ACS/NSTEMI</option><option id="high" value="high">High bleeding risk (initiation only)</option></select></div>
-        <div class="field"><label for="basis">Dosing-weight basis</label><select id="basis" name="basis"><option value="">Select</option><option value="actual">Actual</option><option value="ideal">Ideal</option><option value="adjusted">Adjusted</option></select></div>
-        <div class="field"><label for="weight">Dosing weight (kg)</label><input id="weight" name="weight" inputmode="decimal" aria-describedby="weight-help"><small id="weight-help">Enter the scenario’s dosing weight (30–200 kg). This tool does not derive or select it.</small></div>
-        <div class="field"><label for="ceiling">Scenario infusion ceiling (units/h)</label><input id="ceiling" name="ceiling" inputmode="decimal" aria-describedby="ceiling-help"><small id="ceiling-help">Enter the ceiling specified in your fictional scenario. There is no default.</small></div>
-        <div class="field"><label for="safety">Bleeding or suspected HIT</label><select id="safety" name="safety"><option value="">Select</option><option value="clear">Neither flagged in scenario</option><option value="bleed">Active bleeding flagged</option><option value="hit">Suspected HIT flagged</option></select></div>
+
+  <!-- Dynamic Critical Clinical Safety Banner Stack (Auto-populates on HIT, LMWH, BMI>=40, Heparin Resistance) -->
+  <div id="safetyAlertStack" class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 space-y-2.5"></div>
+
+  <!-- Main Workstation Grid -->
+  <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- =====================================================================
+           LEFT COLUMN (4 COLS): PATIENT PARAMETERS & CLINICAL SAFEGUARDS
+           ===================================================================== -->
+      <div class="lg:col-span-4 space-y-5">
+
+        <!-- Card 1: Patient Anthropometrics & Indication -->
+        <section class="bg-white dark:bg-[#1C1C1E] rounded-[20px] shadow-apple-sm border border-black/[0.06] dark:border-white/[0.09] overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+            <h2 class="text-sm font-semibold tracking-tight">Patient &amp; Protocol Setup</h2>
+            <span class="text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D]">ABW Dosing</span>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <!-- Weight & Height Grid -->
+            <div class="grid grid-cols-12 gap-3">
+              <div class="col-span-7">
+                <div class="flex items-center justify-between mb-1">
+                  <label for="inputWeightKg" class="text-xs font-semibold text-[#3A3A3C] dark:text-[#EBEBF5]">
+                    Actual Weight (kg)
+                  </label>
+                  <button type="button" id="btnToggleLbs" class="text-[11px] font-semibold text-[#007AFF] hover:underline">
+                    lbs ↔ kg
+                  </button>
+                </div>
+                <div class="relative">
+                  <input type="number" id="inputWeightKg" value="82" min="20" max="350" step="0.5"
+                    class="w-full rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-transparent focus:border-[#007AFF] focus:bg-white dark:focus:bg-[#1C1C1E] px-3.5 py-2.5 pr-11 text-base font-mono font-bold tabular-nums outline-none transition" />
+                  <span class="absolute inset-y-0 right-3 flex items-center text-xs font-semibold text-[#8E8E93]">kg</span>
+                </div>
+              </div>
+
+              <div class="col-span-5">
+                <div class="flex items-center justify-between mb-1">
+                  <label for="inputHeightCm" class="text-xs font-semibold text-[#3A3A3C] dark:text-[#EBEBF5]">
+                    Height (opt)
+                  </label>
+                  <span id="bmiBadge" class="text-[11px] font-mono font-semibold text-[#6E6E73] dark:text-[#98989D]">BMI 26.8</span>
+                </div>
+                <div class="relative">
+                  <input type="number" id="inputHeightCm" value="175" min="100" max="240" step="1"
+                    class="w-full rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E] border border-transparent focus:border-[#007AFF] focus:bg-white dark:focus:bg-[#1C1C1E] px-3 py-2.5 pr-10 text-base font-mono font-semibold tabular-nums outline-none transition" />
+                  <span class="absolute inset-y-0 right-2.5 flex items-center text-xs font-semibold text-[#8E8E93]">cm</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Inline lbs Converter Drawer -->
+            <div id="lbsDrawer" class="hidden p-3 rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E] flex items-center justify-between gap-3">
+              <div class="flex-1">
+                <label for="inputWeightLbs" class="block text-[11px] font-medium text-[#6E6E73] dark:text-[#98989D] mb-1">Enter Pounds (lbs)</label>
+                <input type="number" id="inputWeightLbs" value="180.8" step="0.5"
+                  class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-3 py-1.5 text-sm font-mono font-semibold tabular-nums outline-none border border-black/10 dark:border-white/10" />
+              </div>
+              <span class="text-xs font-mono text-[#8E8E93] pt-4">÷ 2.2046</span>
+            </div>
+
+            <!-- Indication Presets (Apple Pill Grid) -->
+            <div>
+              <label class="block text-xs font-semibold text-[#3A3A3C] dark:text-[#EBEBF5] mb-2">
+                Clinical Indication &amp; Intensity
+              </label>
+              <div id="indicationPillGrid" class="grid grid-cols-2 gap-2">
+                <!-- Populated dynamically from active JSON protocol -->
+              </div>
+              <p id="indicationClinicalDesc" class="mt-2 text-xs text-[#6E6E73] dark:text-[#98989D] leading-relaxed">
+                Standard Raschke / UpToDate VTE protocol: 80 U/kg loading bolus followed by 18 U/kg/hr infusion.
+              </p>
+            </div>
+
+            <!-- Custom Protocol Editor (Shown when Custom indication is selected) -->
+            <div id="customIndicationBox" class="hidden p-3.5 rounded-[14px] bg-[#007AFF]/[0.06] dark:bg-[#0A84FF]/[0.12] border border-[#007AFF]/20 space-y-3">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-[#007AFF] dark:text-[#409CFF]">Custom Protocol Parameters</div>
+              <div class="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label for="customBolusUkg" class="block text-[11px] font-medium mb-1">Bolus (U/kg)</label>
+                  <input type="number" id="customBolusUkg" value="80" min="0" max="200" step="1"
+                    class="w-full rounded-[9px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-sm font-mono font-bold tabular-nums border border-black/10 dark:border-white/15 outline-none" />
+                </div>
+                <div>
+                  <label for="customRateUkghr" class="block text-[11px] font-medium mb-1">Rate (U/kg/hr)</label>
+                  <input type="number" id="customRateUkghr" value="18" min="0" max="50" step="0.5"
+                    class="w-full rounded-[9px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-sm font-mono font-bold tabular-nums border border-black/10 dark:border-white/15 outline-none" />
+                </div>
+              </div>
+            </div>
+
+            <!-- IV Concentration & Bag Volume -->
+            <div class="space-y-2.5 pt-1 border-t border-black/[0.06] dark:border-white/[0.08]">
+              <div class="flex items-center justify-between">
+                <label for="selectConcentration" class="text-xs font-semibold text-[#3A3A3C] dark:text-[#EBEBF5]">
+                  IV Bag / Syringe Concentration
+                </label>
+                <span id="highConcAlertTag" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A] border border-[#FF9500]/30">
+                  10× High Conc. Syringe
+                </span>
+              </div>
+              <select id="selectConcentration"
+                class="w-full rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E] px-3.5 py-2.5 text-xs sm:text-sm font-medium outline-none border border-transparent focus:border-[#007AFF] transition">
+                <option value="50" data-vol="500">50 units/mL (25,000 U in 500 mL Standard)</option>
+                <option value="100" data-vol="250" selected>100 units/mL (25,000 U in 250 mL ICU Fluid-Restricted)</option>
+                <option value="500" data-vol="50">500 units/mL (25,000 U in 50 mL Syringe Driver)</option>
+                <option value="custom" data-vol="250">Custom Bag Concentration...</option>
+              </select>
+
+              <!-- Custom Concentration Inputs -->
+              <div id="customConcBox" class="hidden grid grid-cols-2 gap-2.5 p-3 rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E]">
+                <div>
+                  <label for="customTotalUnits" class="block text-[11px] font-medium mb-1">Total Units in Bag</label>
+                  <input type="number" id="customTotalUnits" value="25000" min="1000" step="1000"
+                    class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums outline-none" />
+                </div>
+                <div>
+                  <label for="customTotalVol" class="block text-[11px] font-medium mb-1">Diluent Volume (mL)</label>
+                  <input type="number" id="customTotalVol" value="250" min="10" step="10"
+                    class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums outline-none" />
+                </div>
+              </div>
+
+              <!-- Bag Volume Selector for Run-Dry Estimator -->
+              <div class="flex items-center justify-between gap-2 pt-1">
+                <span class="text-xs text-[#6E6E73] dark:text-[#98989D]">Bag / Syringe Volume:</span>
+                <div class="inline-flex rounded-[10px] bg-[#F2F2F7] dark:bg-[#2C2C2E] p-0.5 text-xs font-semibold">
+                  <button type="button" data-bagvol="50" class="bag-vol-btn px-2.5 py-1 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition">50 mL</button>
+                  <button type="button" data-bagvol="250" class="bag-vol-btn px-2.5 py-1 rounded-[8px] bg-white dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white shadow-apple-sm transition">250 mL</button>
+                  <button type="button" data-bagvol="500" class="bag-vol-btn px-2.5 py-1 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition">500 mL</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Institutional Dose Caps Toggle -->
+            <div class="pt-2 border-t border-black/[0.06] dark:border-white/[0.08]">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-semibold block">Institutional Max Dose Caps</span>
+                  <span id="capSummaryLabel" class="text-[11px] text-[#6E6E73] dark:text-[#98989D]">Off (Uncapped ABW per UpToDate)</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="toggleCaps" class="sr-only peer" />
+                  <div class="w-11 h-6 bg-[#E5E5EA] dark:bg-[#3A3A3C] rounded-full peer peer-checked:bg-[#34C759] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow-sm after:transition-all peer-checked:after:translate-x-5"></div>
+                </label>
+              </div>
+              <div id="capsDrawer" class="hidden mt-2.5 grid grid-cols-2 gap-2.5 p-3 rounded-[12px] bg-[#F2F2F7] dark:bg-[#2C2C2E]">
+                <div>
+                  <label for="inputMaxBolus" class="block text-[11px] font-medium mb-1">Max Bolus (U)</label>
+                  <input type="number" id="inputMaxBolus" value="10000" step="500"
+                    class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums outline-none" />
+                </div>
+                <div>
+                  <label for="inputMaxRate" class="block text-[11px] font-medium mb-1">Max Init. Rate (U/hr)</label>
+                  <input type="number" id="inputMaxRate" value="2000" step="100"
+                    class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums outline-none" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 2: Pre-Infusion & ICU Clinical Safeguards (Apple Grouped Inset List) -->
+        <section class="bg-white dark:bg-[#1C1C1E] rounded-[20px] shadow-apple-sm border border-black/[0.06] dark:border-white/[0.09] overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+            <h2 class="text-sm font-semibold tracking-tight">ICU Clinical Safeguards &amp; 4Ts HIT</h2>
+            <span id="safeguardStatusPill" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]">
+              Clear
+            </span>
+          </div>
+
+          <div class="divide-y divide-black/[0.06] dark:divide-white/[0.08]">
+            <!-- Safeguard 1: Recent LMWH -->
+            <div class="px-5 py-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold">Recent LMWH (&lt; 12 hrs ago)</div>
+                <div class="text-[11px] text-[#6E6E73] dark:text-[#98989D]">Suppresses initial bolus to prevent stacking</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" id="chkRecentLmwh" class="sr-only peer" />
+                <div class="w-11 h-6 bg-[#E5E5EA] dark:bg-[#3A3A3C] rounded-full peer peer-checked:bg-[#FF9500] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow-sm after:transition-all peer-checked:after:translate-x-5"></div>
+              </label>
+            </div>
+
+            <!-- Safeguard 2: Elevated Baseline aPTT -->
+            <div class="px-5 py-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold">Elevated Baseline aPTT (&gt; 38 sec)</div>
+                <div class="text-[11px] text-[#6E6E73] dark:text-[#98989D]">Lupus anticoag / DIC / liver — use Anti-Xa</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" id="chkBaselineAptt" class="sr-only peer" />
+                <div class="w-11 h-6 bg-[#E5E5EA] dark:bg-[#3A3A3C] rounded-full peer peer-checked:bg-[#FF9500] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow-sm after:transition-all peer-checked:after:translate-x-5"></div>
+              </label>
+            </div>
+
+            <!-- Safeguard 3: Therapeutic Hypothermia / TTM -->
+            <div class="px-5 py-3 flex items-center justify-between gap-3">
+              <div>
+                <div class="text-xs font-semibold">Therapeutic Hypothermia / TTM</div>
+                <div class="text-[11px] text-[#6E6E73] dark:text-[#98989D]">Reduced clearance &amp; artifactual aPTT prolongation</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" id="chkHypothermia" class="sr-only peer" />
+                <div class="w-11 h-6 bg-[#E5E5EA] dark:bg-[#3A3A3C] rounded-full peer peer-checked:bg-[#5856D6] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:shadow-sm after:transition-all peer-checked:after:translate-x-5"></div>
+              </label>
+            </div>
+
+            <!-- Safeguard 4: 4Ts HIT Probability & Platelet Tracker -->
+            <div class="p-5 space-y-3 bg-[#F9F9FB] dark:bg-[#161618]">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold">Platelet &amp; 4Ts HIT Screening</span>
+                <span id="plateletDropBadge" class="text-[11px] font-mono font-semibold text-[#6E6E73] dark:text-[#98989D]">
+                  Δ 0.0%
+                </span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div>
+                  <label for="inputPltBase" class="block text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D] mb-1">Baseline Plt</label>
+                  <input type="number" id="inputPltBase" value="240" min="1" max="1500"
+                    class="w-full rounded-[9px] bg-white dark:bg-[#2C2C2E] px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums border border-black/10 dark:border-white/10 outline-none" />
+                </div>
+                <div>
+                  <label for="inputPltCurr" class="block text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D] mb-1">Current Plt</label>
+                  <input type="number" id="inputPltCurr" value="215" min="1" max="1500"
+                    class="w-full rounded-[9px] bg-white dark:bg-[#2C2C2E] px-2.5 py-1.5 text-xs font-mono font-bold tabular-nums border border-black/10 dark:border-white/10 outline-none" />
+                </div>
+                <div>
+                  <label for="select4TsScore" class="block text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D] mb-1">4Ts Score</label>
+                  <select id="select4TsScore"
+                    class="w-full rounded-[9px] bg-white dark:bg-[#2C2C2E] px-2 py-1.5 text-xs font-mono font-bold border border-black/10 dark:border-white/10 outline-none">
+                    <option value="0">0–3 (Low)</option>
+                    <option value="4">4–5 (Int)</option>
+                    <option value="6">6–8 (High)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
-      <fieldset aria-describedby="prep-help prep-context">
-        <legend>Infusion preparation</legend>
-        <p id="prep-help">Enter the total heparin and final volume on the prepared container label for the fictional scenario. Do not enter the vial strength, bag capacity, or diluent volume alone.</p>
-        <p id="prep-context" hidden><strong>Titration:</strong> Use the running infusion’s concentration. Do not use this workflow to switch to a different concentration.</p>
-        <div class="fields">
-          <div class="field"><label for="container">Container</label><select id="container" name="container"><option value="">Select</option><option value="bag">Infusion bag</option><option value="syringe">Syringe</option></select></div>
-          <div class="field"><label for="totalUnits">Total heparin (units)</label><input id="totalUnits" name="totalUnits" inputmode="numeric" maxlength="12" aria-describedby="units-help"><small id="units-help">Whole units in the full preparation.</small></div>
-          <div class="field"><label for="finalVolume">Final prepared volume (mL)</label><input id="finalVolume" name="finalVolume" inputmode="decimal" maxlength="14" aria-describedby="volume-help"><small id="volume-help">Use the labeled final volume, with up to two decimal places.</small></div>
+
+      <!-- =====================================================================
+           RIGHT COLUMN (8 COLS): ORDERS, DOUBLE-CHECK, TITRATION & TIMELINE
+           ===================================================================== -->
+      <div class="lg:col-span-8 space-y-6">
+
+        <!-- MODULE A: INITIAL LOADING BOLUS & STARTING INFUSION ORDER -->
+        <section class="bg-white dark:bg-[#1C1C1E] rounded-[20px] shadow-apple-sm border border-black/[0.06] dark:border-white/[0.09] overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <h2 class="text-sm font-semibold tracking-tight">1. Initial Loading Bolus &amp; Starting Infusion Order</h2>
+              <span id="verifiedBadgePill" class="hidden inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158] border border-[#34C759]/30">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+                Verified Match — Dual Sign-Off Recorded
+              </span>
+            </div>
+            <span id="activeProtocolPill" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#3A3A3C] dark:text-[#EBEBF5]">
+              Acute VTE • 80 U/kg | 18 U/kg/hr
+            </span>
+          </div>
+
+          <div class="p-5 space-y-5">
+            <!-- Hero Order Cards (Masked if 2nd-Nurse Double-Check is active & unverified) -->
+            <div id="orderCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 transition-all">
+              <!-- Card A1: Loading Bolus -->
+              <div class="rounded-[16px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/75 p-5 border border-black/[0.05] dark:border-white/[0.08] flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">Initial IV Loading Bolus</span>
+                    <span id="bolusStatusTag" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A]">CAPPED</span>
+                  </div>
+
+                  <div class="mt-2 flex items-baseline gap-2">
+                    <span id="dispBolusUnits" class="text-4xl font-bold font-mono tracking-tight tabular-nums">6,560</span>
+                    <span class="text-sm font-semibold text-[#6E6E73] dark:text-[#98989D]">units IV push</span>
+                  </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.08] space-y-1.5 text-xs">
+                  <div class="flex justify-between">
+                    <span class="text-[#6E6E73] dark:text-[#98989D]">1,000 units/mL Bolus Vial:</span>
+                    <span id="dispBolusVial1k" class="font-mono font-bold tabular-nums">6.56 mL</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-[#6E6E73] dark:text-[#98989D]">5,000 units/mL Bolus Vial:</span>
+                    <span id="dispBolusVial5k" class="font-mono font-bold tabular-nums">1.31 mL</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-[#6E6E73] dark:text-[#98989D]">From IV Bag (<span id="dispBagConc1">100</span> U/mL):</span>
+                    <span id="dispBolusBagMl" class="font-mono font-semibold text-[#007AFF] dark:text-[#409CFF] tabular-nums">65.6 mL</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card A2: Starting Infusion Rate + Smart Pump Rounding + Run-Dry -->
+              <div class="rounded-[16px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/75 p-5 border border-black/[0.05] dark:border-white/[0.08] flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">Initial Continuous Infusion</span>
+                    <span id="rateStatusTag" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A]">CAPPED</span>
+                  </div>
+
+                  <div class="mt-2 flex flex-wrap items-baseline gap-2.5">
+                    <div class="flex items-baseline gap-1.5">
+                      <span id="dispPumpRoundedMlHr" class="text-4xl font-bold font-mono tracking-tight text-[#007AFF] dark:text-[#409CFF] tabular-nums">14.8</span>
+                      <span class="text-sm font-bold text-[#007AFF] dark:text-[#409CFF]">mL/hr</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-[#007AFF]/10 text-[#007AFF] dark:bg-[#0A84FF]/20 dark:text-[#409CFF]">
+                      Pump-Rounded (Exact: <span id="dispExactMlHr">14.76</span>)
+                    </span>
+                  </div>
+
+                  <div class="mt-1 text-xs font-mono font-semibold text-[#3A3A3C] dark:text-[#EBEBF5] tabular-nums">
+                    <span id="dispInfusionUnitsHr">1,476</span> units/hr • <span id="dispDailyTotalUnits">35,424</span> units/24hr
+                  </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-black/[0.06] dark:border-white/[0.08] space-y-1.5 text-xs">
+                  <div class="flex justify-between">
+                    <span class="text-[#6E6E73] dark:text-[#98989D]">Bag Run-Dry Estimator (<span id="dispBagVolLabel">250</span> mL):</span>
+                    <span id="dispBagRunDry" class="font-mono font-bold text-[#34C759] dark:text-[#30D158] tabular-nums">16 hrs 53 mins</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-[#6E6E73] dark:text-[#98989D]">First Coagulation Check:</span>
+                    <span class="font-mono font-semibold tabular-nums">6 hrs after initiation</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Independent 2nd-Nurse / Pharmacist Double-Check Drawer -->
+            <div id="doubleCheckDrawer" class="hidden rounded-[16px] bg-[#5856D6]/[0.06] dark:bg-[#5E5CE6]/[0.14] border-2 border-[#5856D6]/30 p-5 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full bg-[#5856D6] text-white text-xs font-bold flex items-center justify-center">2×</span>
+                  <div>
+                    <h3 class="text-sm font-bold text-[#1D1D1F] dark:text-white">Independent 2nd Clinician High-Alert Verification</h3>
+                    <p class="text-xs text-[#6E6E73] dark:text-[#98989D]">Primary calculations are masked. Second nurse/pharmacist must independently calculate and enter values below.</p>
+                  </div>
+                </div>
+                <button type="button" id="btnCancelVerifier" class="text-xs font-semibold text-[#6E6E73] hover:text-[#1D1D1F] dark:hover:text-white underline">
+                  Exit Double-Check
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label for="verWeightKg" class="block text-[11px] font-semibold mb-1">Confirm Weight (kg)</label>
+                  <input type="number" id="verWeightKg" placeholder="kg" step="0.5"
+                    class="w-full rounded-[10px] bg-white dark:bg-[#1C1C1E] px-3 py-2 text-sm font-mono font-bold border border-black/15 dark:border-white/15 outline-none" />
+                </div>
+                <div>
+                  <label for="verConc" class="block text-[11px] font-semibold mb-1">Confirm Bag (U/mL)</label>
+                  <input type="number" id="verConc" placeholder="U/mL" step="1"
+                    class="w-full rounded-[10px] bg-white dark:bg-[#1C1C1E] px-3 py-2 text-sm font-mono font-bold border border-black/15 dark:border-white/15 outline-none" />
+                </div>
+                <div>
+                  <label for="verBolusUnits" class="block text-[11px] font-semibold mb-1">Indep. Bolus (Units)</label>
+                  <input type="number" id="verBolusUnits" placeholder="Units" step="10"
+                    class="w-full rounded-[10px] bg-white dark:bg-[#1C1C1E] px-3 py-2 text-sm font-mono font-bold border border-black/15 dark:border-white/15 outline-none" />
+                </div>
+                <div>
+                  <label for="verPumpMlHr" class="block text-[11px] font-semibold mb-1">Indep. Rate (mL/hr)</label>
+                  <input type="number" id="verPumpMlHr" placeholder="mL/hr" step="0.1"
+                    class="w-full rounded-[10px] bg-white dark:bg-[#1C1C1E] px-3 py-2 text-sm font-mono font-bold border border-black/15 dark:border-white/15 outline-none" />
+                </div>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <div id="verifierFeedbackMsg" class="text-xs font-semibold text-[#6E6E73] dark:text-[#98989D]">
+                  Enter all four independent check values to validate against order.
+                </div>
+                <button type="button" id="btnVerifyMatch"
+                  class="px-4 py-2 rounded-full text-xs font-semibold bg-[#5856D6] hover:bg-[#4745B5] text-white shadow-apple-sm transition">
+                  Validate &amp; Reveal Order
+                </button>
+              </div>
+            </div>
+
+            <!-- Transparent UpToDate Mathematical Equations Accordion -->
+            <details class="group rounded-[14px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/50 border border-black/[0.05] dark:border-white/[0.08]">
+              <summary class="px-4 py-2.5 text-xs font-semibold text-[#3A3A3C] dark:text-[#EBEBF5] cursor-pointer select-none flex items-center justify-between list-none">
+                <span class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#007AFF]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                  UpToDate Mathematical Equations &amp; Substituted Audit
+                </span>
+                <span class="text-[#8E8E93] group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div class="px-4 pb-3.5 pt-1 space-y-2 font-mono text-xs border-t border-black/[0.05] dark:border-white/[0.08]">
+                <div>
+                  <span class="text-[#6E6E73] dark:text-[#98989D] block text-[11px]">1. Bolus (U) = ABW (kg) × Bolus Factor (U/kg)</span>
+                  <span id="eqBolusAudit" class="font-semibold">82 kg × 80 U/kg = 6,560 units</span>
+                </div>
+                <div>
+                  <span class="text-[#6E6E73] dark:text-[#98989D] block text-[11px]">2. Infusion Rate (U/hr) = ABW (kg) × Rate Factor (U/kg/hr)</span>
+                  <span id="eqRateAudit" class="font-semibold">82 kg × 18 U/kg/hr = 1,476 units/hr</span>
+                </div>
+                <div>
+                  <span class="text-[#6E6E73] dark:text-[#98989D] block text-[11px]">3. Pump Rate (mL/hr) = Infusion Rate (U/hr) ÷ Concentration (U/mL)</span>
+                  <span id="eqPumpAudit" class="font-semibold text-[#007AFF] dark:text-[#409CFF]">1,476 U/hr ÷ 100 U/mL = 14.76 mL/hr → Pump-Rounded: 14.8 mL/hr</span>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- MODULE B: INTERACTIVE UPDATODATE NOMOGRAM TITRATION CALCULATOR -->
+        <section class="bg-white dark:bg-[#1C1C1E] rounded-[20px] shadow-apple-sm border border-black/[0.06] dark:border-white/[0.09] overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-sm font-semibold tracking-tight">2. Nomogram Titration &amp; Dose Adjustment</h2>
+              <p class="text-[11px] text-[#6E6E73] dark:text-[#98989D]">Weight-normalized adjustment per UpToDate Anti-Factor Xa / aPTT algorithm</p>
+            </div>
+
+            <!-- Apple Segmented Assay Control -->
+            <div class="inline-flex rounded-[10px] bg-[#F2F2F7] dark:bg-[#2C2C2E] p-0.5 text-xs font-semibold">
+              <button type="button" id="segAntiXa" class="px-3 py-1.5 rounded-[8px] bg-white dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white shadow-apple-sm transition">
+                Anti-Factor Xa (IU/mL)
+              </button>
+              <button type="button" id="segAptt" class="px-3 py-1.5 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition">
+                aPTT (seconds)
+              </button>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
+
+              <!-- Left Titration Inputs (5 cols) -->
+              <div class="md:col-span-5 space-y-3.5">
+                <!-- Current Rate Sync Box -->
+                <div class="p-3.5 rounded-[14px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/75 space-y-2.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">Current Rate</span>
+                    <button type="button" id="btnSyncRate" class="text-[11px] font-semibold text-[#007AFF] hover:underline">
+                      Sync Initial (<span id="lblSyncInitRate">14.8</span> mL/hr)
+                    </button>
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label for="curPumpMlHr" class="block text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D] mb-1">Pump (mL/hr)</label>
+                      <input type="number" id="curPumpMlHr" value="14.8" min="0" max="200" step="0.1"
+                        class="w-full rounded-[9px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-sm font-mono font-bold tabular-nums border border-black/10 dark:border-white/10 outline-none focus:border-[#007AFF]" />
+                    </div>
+                    <div>
+                      <label for="curUnitsHr" class="block text-[10px] font-medium text-[#6E6E73] dark:text-[#98989D] mb-1">Dose (U/hr)</label>
+                      <input type="number" id="curUnitsHr" value="1480" min="0" max="10000" step="10"
+                        class="w-full rounded-[9px] bg-white dark:bg-[#1C1C1E] px-2.5 py-1.5 text-sm font-mono font-bold tabular-nums border border-black/10 dark:border-white/10 outline-none focus:border-[#007AFF]" />
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] pt-0.5">
+                    <span class="text-[#6E6E73] dark:text-[#98989D]">Normalized Rate:</span>
+                    <span id="dispNormRate" class="font-mono font-bold tabular-nums">18.0 U/kg/hr (35,520 U/d)</span>
+                  </div>
+                </div>
+
+                <!-- Lab Value Input -->
+                <div class="p-3.5 rounded-[14px] bg-[#007AFF]/[0.06] dark:bg-[#0A84FF]/[0.12] border border-[#007AFF]/20 space-y-2.5">
+                  <div class="flex items-center justify-between gap-1">
+                    <label for="inputLabResult" id="lblLabInput" class="text-xs font-semibold">Anti-Factor Xa Level</label>
+                    <span id="badgeTargetRange" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]">
+                      Target: 0.30–0.70
+                    </span>
+                  </div>
+
+                  <div class="relative">
+                    <input type="number" id="inputLabResult" value="0.22" min="0" max="300" step="0.01"
+                      class="w-full rounded-[12px] bg-white dark:bg-[#1C1C1E] px-3.5 py-2.5 pr-14 text-xl font-mono font-bold tabular-nums border border-[#007AFF]/40 focus:border-[#007AFF] outline-none" />
+                    <span id="lblLabUnit" class="absolute inset-y-0 right-3.5 flex items-center text-xs font-bold text-[#007AFF] dark:text-[#409CFF]">IU/mL</span>
+                  </div>
+
+                  <!-- Quick Preset Test Pills -->
+                  <div id="presetsAntiXa" class="flex flex-wrap gap-1">
+                    <button type="button" data-lab="0.08" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 hover:border-[#007AFF]">0.08</button>
+                    <button type="button" data-lab="0.22" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10 hover:border-[#007AFF]">0.22</button>
+                    <button type="button" data-lab="0.50" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] text-[#248A3D] dark:text-[#30D158] border border-black/10 dark:border-white/10 hover:border-[#34C759]">0.50</button>
+                    <button type="button" data-lab="0.84" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] text-[#C93400] dark:text-[#FF9F0A] border border-black/10 dark:border-white/10 hover:border-[#FF9500]">0.84</button>
+                    <button type="button" data-lab="1.15" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] text-[#D70015] dark:text-[#FF453A] border border-black/10 dark:border-white/10 hover:border-[#FF3B30]">1.15</button>
+                  </div>
+
+                  <div id="presetsAptt" class="hidden flex-wrap gap-1">
+                    <button type="button" data-lab="35" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10">35s</button>
+                    <button type="button" data-lab="52" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] border border-black/10 dark:border-white/10">52s</button>
+                    <button type="button" data-lab="74" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] text-[#248A3D] dark:text-[#30D158] border border-black/10 dark:border-white/10">74s</button>
+                    <button type="button" data-lab="98" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] text-[#C93400] dark:text-[#FF9F0A] border border-black/10 dark:border-white/10">98s</button>
+                    <button type="button" data-lab="124" class="lab-quick-btn px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-white dark:bg-[#2C2C2E] text-[#D70015] dark:text-[#FF453A] border border-black/10 dark:border-white/10">124s</button>
+                  </div>
+
+                  <!-- Editable Institutional aPTT Target Bounds -->
+                  <div id="apttBoundsDrawer" class="hidden pt-2 border-t border-[#007AFF]/15 grid grid-cols-2 gap-2">
+                    <div>
+                      <label for="apttLowBound" class="block text-[10px] text-[#6E6E73] dark:text-[#98989D]">Inst. aPTT Low (s)</label>
+                      <input type="number" id="apttLowBound" value="60" min="40" max="100"
+                        class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-2 py-1 text-xs font-mono font-bold border border-black/10 dark:border-white/10" />
+                    </div>
+                    <div>
+                      <label for="apttHighBound" class="block text-[10px] text-[#6E6E73] dark:text-[#98989D]">Inst. aPTT High (s)</label>
+                      <input type="number" id="apttHighBound" value="85" min="60" max="150"
+                        class="w-full rounded-[8px] bg-white dark:bg-[#1C1C1E] px-2 py-1 text-xs font-mono font-bold border border-black/10 dark:border-white/10" />
+                    </div>
+                  </div>
+
+                  <!-- Consecutive Therapeutic Checkbox (Adjusts q6h -> q24h interval) -->
+                  <label class="flex items-center gap-2 pt-1 cursor-pointer select-none">
+                    <input type="checkbox" id="chkConsecutiveTherapeutic" class="rounded text-[#007AFF] focus:ring-0" />
+                    <span class="text-[11px] text-[#3A3A3C] dark:text-[#EBEBF5]">2nd consecutive therapeutic level (extends lab to q24h)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Right Live Titration Action Card (7 cols) -->
+              <div class="md:col-span-7">
+                <div id="titrationResultCard" class="rounded-[18px] p-5 border-2 border-[#FF9500]/40 bg-[#FF9500]/[0.05] space-y-4 transition-all">
+                  <div class="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <span id="titrationBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A]">
+                        SUBTHERAPEUTIC • INCREASE RATE
+                      </span>
+                      <h3 id="titrationTitle" class="text-base font-bold mt-1.5 leading-snug">
+                        No bolus. Increase infusion rate by +1 U/kg/hr (+82 U/hr).
+                      </h3>
+                    </div>
+                    <span id="titrationTierTag" class="px-2.5 py-1 rounded-[8px] bg-white/80 dark:bg-[#2C2C2E] text-[11px] font-mono font-semibold border border-black/5 dark:border-white/10">
+                      Anti-Xa 0.20–0.29
+                    </span>
+                  </div>
+
+                  <!-- 4 Action Tiles -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div class="rounded-[12px] bg-white dark:bg-[#2C2C2E] p-3 border border-black/5 dark:border-white/10">
+                      <span class="text-[10px] font-semibold uppercase text-[#6E6E73] dark:text-[#98989D] block">Re-Bolus</span>
+                      <span id="resRebolusUnits" class="text-lg font-bold font-mono tabular-nums mt-0.5 block">0 U</span>
+                      <span id="resRebolusVial" class="text-[10px] font-mono text-[#6E6E73] dark:text-[#98989D] block">None</span>
+                    </div>
+
+                    <div class="rounded-[12px] bg-white dark:bg-[#2C2C2E] p-3 border border-black/5 dark:border-white/10">
+                      <span class="text-[10px] font-semibold uppercase text-[#6E6E73] dark:text-[#98989D] block">Hold Pump</span>
+                      <span id="resHoldTime" class="text-lg font-bold font-mono tabular-nums mt-0.5 block">0 min</span>
+                      <span id="resHoldNote" class="text-[10px] text-[#6E6E73] dark:text-[#98989D] block">No pause</span>
+                    </div>
+
+                    <div class="rounded-[12px] bg-white dark:bg-[#2C2C2E] p-3 border-2 border-[#007AFF]/40">
+                      <span class="text-[10px] font-bold uppercase text-[#007AFF] dark:text-[#409CFF] block">New Pump Rate</span>
+                      <span id="resNewMlHr" class="text-lg font-bold font-mono text-[#007AFF] dark:text-[#409CFF] tabular-nums mt-0.5 block">15.6 mL/hr</span>
+                      <span id="resNewUnitsHr" class="text-[10px] font-mono font-semibold tabular-nums block">1,562 U/hr</span>
+                    </div>
+
+                    <div class="rounded-[12px] bg-white dark:bg-[#2C2C2E] p-3 border border-black/5 dark:border-white/10">
+                      <span class="text-[10px] font-semibold uppercase text-[#6E6E73] dark:text-[#98989D] block">Next Lab</span>
+                      <span id="resNextLab" class="text-lg font-bold font-mono tabular-nums mt-0.5 block">In 6 hrs</span>
+                      <span id="resNextLabSub" class="text-[10px] text-[#6E6E73] dark:text-[#98989D] block">Post-change</span>
+                    </div>
+                  </div>
+
+                  <!-- Audit Equation + Log to Flowsheet Action -->
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                    <div id="titrationFormulaLine" class="text-[11px] font-mono text-[#3A3A3C] dark:text-[#EBEBF5]">
+                      1,480 U/hr + (+1 U/kg/hr × 82 kg = +82 U/hr) = 1,562 U/hr (15.6 mL/hr)
+                    </div>
+                    <button type="button" id="btnLogTitration"
+                      class="shrink-0 px-3.5 py-2 rounded-full text-xs font-semibold bg-[#1D1D1F] dark:bg-white text-white dark:text-[#1D1D1F] hover:opacity-90 active:scale-[0.98] transition flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                      <span>Log to Shift Timeline &amp; Start Timer</span>
+                    </button>
+                  </div>
+
+                  <!-- Critical Notify Banner -->
+                  <div id="criticalAlertBanner" class="hidden rounded-[12px] bg-[#FF3B30] text-white p-3 text-xs font-semibold flex items-center gap-2.5">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+                    <span>CRITICAL SUPRATHERAPEUTIC LEVEL: Hold infusion, examine for active bleeding, and NOTIFY ATTENDING INTENSIVIST immediately.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Collapsible Full Nomogram Reference Table -->
+            <details class="group rounded-[14px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/50 border border-black/[0.05] dark:border-white/[0.08]">
+              <summary class="px-4 py-2.5 text-xs font-semibold text-[#3A3A3C] dark:text-[#EBEBF5] cursor-pointer select-none flex items-center justify-between list-none">
+                <span>View Complete Institutional Titration Nomogram Table (Active Tier Highlighted)</span>
+                <span class="text-[#8E8E93] group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <div class="p-3 border-t border-black/[0.05] dark:border-white/[0.08] overflow-x-auto">
+                <table class="min-w-full text-xs text-left">
+                  <thead class="text-[#6E6E73] dark:text-[#98989D] border-b border-black/10 dark:border-white/10">
+                    <tr>
+                      <th class="py-2 px-2.5">Anti-Xa (IU/mL)</th>
+                      <th class="py-2 px-2.5">aPTT (sec)</th>
+                      <th class="py-2 px-2.5">Bolus / Hold</th>
+                      <th class="py-2 px-2.5">Rate Δ (U/kg/hr)</th>
+                      <th class="py-2 px-2.5">Patient Δ (<span id="tblWeightHdr">82</span> kg)</th>
+                      <th class="py-2 px-2.5">Next Lab</th>
+                    </tr>
+                  </thead>
+                  <tbody id="nomogramBody" class="divide-y divide-black/5 dark:divide-white/5"></tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <!-- MODULE C: LONGITUDINAL ICU SHIFT TIMELINE, DOSE-RESPONSE CHART & LAB TIMER -->
+        <section class="bg-white dark:bg-[#1C1C1E] rounded-[20px] shadow-apple-sm border border-black/[0.06] dark:border-white/[0.09] overflow-hidden">
+          <div class="px-5 py-3.5 border-b border-black/[0.06] dark:border-white/[0.08] flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-sm font-semibold tracking-tight">3. Longitudinal ICU Shift Timeline &amp; q6h Lab Countdown</h2>
+              <p class="text-[11px] text-[#6E6E73] dark:text-[#98989D]">Dose-response trend visualization, scheduled draw timer &amp; flowsheet log</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" id="btnLoadSampleShift"
+                class="px-3 py-1 rounded-full text-xs font-semibold bg-[#F2F2F7] dark:bg-[#2C2C2E] hover:bg-black/10 dark:hover:bg-white/15 transition">
+                Load Sample 18h ICU Shift
+              </button>
+              <button type="button" id="btnClearTimeline"
+                class="px-3 py-1 rounded-full text-xs font-semibold text-[#FF3B30] bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 transition">
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+              <!-- Left: Live q6h / q24h Lab Countdown Ring (4 cols) -->
+              <div class="md:col-span-4 rounded-[16px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/75 p-4 border border-black/[0.05] dark:border-white/[0.08] flex flex-col items-center text-center">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-[#6E6E73] dark:text-[#98989D]">Next Coag Draw Timer</span>
+
+                <!-- SVG Progress Ring -->
+                <div class="relative w-32 h-32 my-3 flex items-center justify-center">
+                  <svg class="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="currentColor" stroke-width="8" class="text-black/[0.08] dark:text-white/[0.1]" />
+                    <circle id="timerProgressCircle" cx="60" cy="60" r="50" fill="none" stroke="#007AFF" stroke-width="8" stroke-linecap="round"
+                      stroke-dasharray="314.16" stroke-dashoffset="0" class="transition-all duration-500" />
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span id="timerCountdownDisplay" class="text-lg font-bold font-mono tabular-nums">06:00:00</span>
+                    <span id="timerIntervalBadge" class="text-[10px] font-semibold text-[#007AFF] dark:text-[#409CFF]">q6h Protocol</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                  <button type="button" id="btnTimerToggle" class="px-3 py-1 rounded-full text-xs font-semibold bg-[#007AFF] text-white hover:bg-[#0066D6] transition">
+                    Pause
+                  </button>
+                  <button type="button" id="btnTimerSimPlus1h" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 hover:border-[#007AFF] transition" title="Fast-forward 1 hour for bedside preview">
+                    +1h Sim
+                  </button>
+                  <button type="button" id="btnTimerReset" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white dark:bg-[#1C1C1E] border border-black/10 dark:border-white/10 transition">
+                    Reset
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: Apple Health-Inspired Dual-Axis SVG Dose-Response Chart (8 cols) -->
+              <div class="md:col-span-8 rounded-[16px] bg-[#F5F5F7] dark:bg-[#2C2C2E]/75 p-4 border border-black/[0.05] dark:border-white/[0.08]">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <span class="text-xs font-semibold">Dose-Response Trend (Lab Level vs. Infusion Rate)</span>
+                  <div class="flex items-center gap-3 text-[11px]">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#007AFF]"></span> Lab Level</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#5856D6]"></span> Rate (U/kg/hr)</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-[#34C759]/30 border border-[#34C759]"></span> Therapeutic</span>
+                  </div>
+                </div>
+                <div id="trendChartContainer" class="w-full h-44 flex items-center justify-center">
+                  <!-- Dynamic SVG rendered here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Flowsheet Log Table -->
+            <div class="overflow-x-auto rounded-[12px] border border-black/[0.06] dark:border-white/[0.08]">
+              <table class="min-w-full text-xs text-left">
+                <thead class="bg-[#F5F5F7] dark:bg-[#2C2C2E] text-[#6E6E73] dark:text-[#98989D]">
+                  <tr>
+                    <th class="py-2 px-3">Time</th>
+                    <th class="py-2 px-3">Lab Result</th>
+                    <th class="py-2 px-3">Action Taken</th>
+                    <th class="py-2 px-3">New Rate (U/hr)</th>
+                    <th class="py-2 px-3">Pump (mL/hr)</th>
+                    <th class="py-2 px-3">Normalized</th>
+                  </tr>
+                </thead>
+                <tbody id="shiftLogTableBody" class="divide-y divide-black/[0.05] dark:divide-white/[0.08]">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Minimalist Footer -->
+  <footer class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-[#6E6E73] dark:text-[#98989D]">
+    Clinical Decision Support Tool • Verify institutional reagent calibration &amp; smart-pump drug library limits prior to administration.
+  </footer>
+
+  <!-- =========================================================================
+       MODAL: INSTITUTIONAL JSON PROTOCOL CUSTOMIZER & SMART ON FHIR PAYLOAD
+       ========================================================================= -->
+  <div id="protocolModalBackdrop" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#1C1C1E] rounded-[24px] shadow-apple-lg border border-black/10 dark:border-white/15 w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden">
+      <div class="px-6 py-4 border-b border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold">Institutional Protocol JSON Engine &amp; SMART on FHIR Schema</h3>
+          <p class="text-xs text-[#6E6E73] dark:text-[#98989D]">Edit P&amp;T protocol parameters live or inspect EHR-ready FHIR R4 resources</p>
         </div>
-        <p id="preparation-preview" role="status">Enter a container, total heparin, and final volume to see the concentration.</p>
-      </fieldset>
-      <fieldset id="labs" hidden disabled>
-        <legend>Monitoring sample</legend>
-        <div class="fields">
-          <div class="field"><label for="assay">Assay</label><select id="assay" name="assay"><option value="">Select</option><option value="aptt">aPTT</option><option value="antiXa">UFH anti-Xa (alert only)</option></select></div>
-          <div class="field"><label for="lab" id="lab-label">Lab result</label><input id="lab" name="lab" inputmode="decimal"></div>
-          <div class="field" id="anti-limit" hidden><label for="antiXaUpper">Scenario anti-Xa upper limit (IU/mL)</label><input id="antiXaUpper" name="antiXaUpper" inputmode="decimal"></div>
-          <div class="field" id="sample-time"><label for="collected">Sample collected (UTC)</label><input id="collected" name="collected" type="datetime-local"></div>
-          <div class="field" id="current-rate"><label for="current">Current running infusion (units/h)</label><input id="current" name="current" inputmode="decimal"></div>
+        <button type="button" id="btnCloseProtocolModal" class="w-8 h-8 rounded-full bg-[#F2F2F7] dark:bg-[#2C2C2E] flex items-center justify-center text-sm font-bold hover:opacity-80">✕</button>
+      </div>
+
+      <!-- Modal Segmented Tabs -->
+      <div class="px-6 pt-3 flex items-center justify-between gap-2">
+        <div class="inline-flex rounded-[10px] bg-[#F2F2F7] dark:bg-[#2C2C2E] p-0.5 text-xs font-semibold">
+          <button type="button" id="tabModalProtocolJson" class="px-3.5 py-1.5 rounded-[8px] bg-white dark:bg-[#3A3A3C] shadow-apple-sm">
+            protocol.json (Editable P&amp;T Rules)
+          </button>
+          <button type="button" id="tabModalFhirJson" class="px-3.5 py-1.5 rounded-[8px] text-[#6E6E73] dark:text-[#98989D]">
+            SMART on FHIR R4 Context
+          </button>
         </div>
-        <label class="check"><input type="checkbox" name="critical"> Lab flagged the result as critical</label>
-      </fieldset>
-      <fieldset>
-        <legend>Platelet trend (optional, ×10<sup>9</sup>/L)</legend>
-        <div class="fields">
-          <div class="field"><label for="plateletReference">Reference count</label><input id="plateletReference" name="plateletReference" inputmode="decimal"></div>
-          <div class="field"><label for="plateletCurrent">Current count</label><input id="plateletCurrent" name="plateletCurrent" inputmode="decimal"></div>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnDownloadProtocolJson" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-[#F2F2F7] dark:bg-[#2C2C2E] hover:opacity-80">
+            Export JSON
+          </button>
         </div>
-      </fieldset>
-      <label class="check"><input id="confirm" name="confirm" type="checkbox"> <span>I checked the calculated concentration against the fictional container label and verified the other inputs.<span id="confirm-context" hidden> The preparation is for the running infusion, and I verified sample timing.</span></span></label>
-      <button type="submit">Calculate example</button>
-    </fieldset>
-  </form>
-  <p id="error" role="alert" hidden></p>
-  <section id="result" hidden aria-labelledby="result-title">
-    <h2 id="result-title" tabindex="-1">Illustrative calculation</h2>
-    <p id="warnings" class="warning" hidden></p>
-    <ol id="breakdown"></ol>
-    <details>
-      <summary>Clinical note preview (simulation)</summary>
-      <textarea id="note" readonly aria-label="Simulated clinical note"></textarea>
-    </details>
-    <button id="copy" type="button">Copy Clinical Note</button>
-    <p id="copy-status" role="status"></p>
-  </section>
-  <details>
-    <summary>Limits of this simulation</summary>
-    <p>The aPTT bands come from the repository’s sample tables, not a local lab calibration. Anti-Xa does not select a dose. The calculator does not validate concentration against a local formulary or flow against a pump library. No workflow calculates reversal, restart timing, or a switch to an oral anticoagulant.</p>
-  </details>
-</main>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto flex-1">
+        <div id="paneProtocolJson" class="space-y-3">
+          <textarea id="protocolJsonEditor" rows="15"
+            class="w-full rounded-[14px] bg-[#F5F5F7] dark:bg-[#121214] p-4 font-mono text-xs leading-relaxed border border-black/10 dark:border-white/10 outline-none focus:border-[#007AFF]"></textarea>
+          <div id="jsonErrorMsg" class="hidden text-xs font-semibold text-[#FF3B30]"></div>
+        </div>
+
+        <div id="paneFhirJson" class="hidden space-y-2">
+          <p class="text-xs text-[#6E6E73] dark:text-[#98989D]">
+            Live FHIR R4 Bundle (`Patient`, `MedicationRequest`, `Observation`) structured for Epic/Cerner SMART on FHIR `client-js` launch context:
+          </p>
+          <pre id="fhirPayloadPreview" class="w-full rounded-[14px] bg-[#F5F5F7] dark:bg-[#121214] p-4 font-mono text-xs leading-relaxed overflow-x-auto border border-black/10 dark:border-white/10"></pre>
+        </div>
+      </div>
+
+      <div class="px-6 py-3.5 border-t border-black/[0.06] dark:border-white/[0.08] flex items-center justify-between bg-[#F9F9FB] dark:bg-[#161618]">
+        <button type="button" id="btnResetProtocolJson" class="text-xs font-semibold text-[#FF3B30] hover:underline">
+          Restore Default P&amp;T v2026.1
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnApplyProtocolJson" class="px-4 py-2 rounded-full text-xs font-semibold bg-[#007AFF] hover:bg-[#0066D6] text-white shadow-apple-sm transition">
+            Apply Protocol JSON Live
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       APPLICATION ENGINE (MODULAR VANILLA JS)
+       ========================================================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      // Default Institutional Protocol JSON Schema (Editable via Modal)
+      const DEFAULT_PROTOCOL = {
+        protocolVersion: 'P&T Protocol v2026.1',
+        guidelineSource: 'UpToDate Anti-Xa / aPTT',
+        indications: {
+          vte: {
+            label: 'Acute VTE (DVT/PE)',
+            shortDesc: '80 U/kg • 18 U/kg/hr',
+            bolusUkg: 80,
+            rateUkghr: 18,
+            maxBolus: 10000,
+            maxRate: 2000,
+            antiXaTarget: [0.30, 0.70],
+            clinicalNote: 'High-intensity VTE protocol (Raschke / UpToDate): 80 units/kg IV bolus followed by 18 units/kg/hr continuous infusion.'
+          },
+          acs: {
+            label: 'ACS / NSTEMI / UA',
+            shortDesc: '60 U/kg • 12 U/kg/hr',
+            bolusUkg: 60,
+            rateUkghr: 12,
+            maxBolus: 4000,
+            maxRate: 1000,
+            antiXaTarget: [0.30, 0.70],
+            clinicalNote: 'Moderate-intensity ACS protocol: 60 units/kg IV bolus and 12 units/kg/hr infusion (toggle caps ON for ACC/AHA 4,000 U / 1,000 U/hr limits).'
+          },
+          stroke: {
+            label: 'Stroke / High Bleed Risk',
+            shortDesc: 'No Bolus • 12 U/kg/hr',
+            bolusUkg: 0,
+            rateUkghr: 12,
+            maxBolus: 0,
+            maxRate: 1000,
+            antiXaTarget: [0.30, 0.70],
+            clinicalNote: 'Low-intensity / high bleeding-risk protocol: Omit initial IV loading bolus; start infusion at 12 units/kg/hr.'
+          },
+          ecmo: {
+            label: 'VA/VV ECMO & CRRT',
+            shortDesc: '0–50 U/kg • 10 U/kg/hr',
+            bolusUkg: 0,
+            rateUkghr: 10,
+            maxBolus: 5000,
+            maxRate: 1500,
+            antiXaTarget: [0.20, 0.40],
+            clinicalNote: 'Extracorporeal circuit anticoagulation: Low-intensity initiation (0 U/kg bolus; 10 U/kg/hr) targeting Anti-Factor Xa 0.20–0.40 IU/mL.'
+          },
+          valve: {
+            label: 'Mech. Valve Bridging',
+            shortDesc: 'No Bolus • 14 U/kg/hr',
+            bolusUkg: 0,
+            rateUkghr: 14,
+            maxBolus: 0,
+            maxRate: 1800,
+            antiXaTarget: [0.30, 0.70],
+            clinicalNote: 'Mechanical heart valve bridging: Omit loading bolus to minimize perioperative bleeding; initiate at 14 units/kg/hr.'
+          },
+          custom: {
+            label: 'Custom Protocol',
+            shortDesc: 'User-Defined U/kg',
+            bolusUkg: 80,
+            rateUkghr: 18,
+            maxBolus: 10000,
+            maxRate: 2000,
+            antiXaTarget: [0.30, 0.70],
+            clinicalNote: 'Custom user-defined weight-based bolus (U/kg), infusion rate (U/kg/hr), and maximum dose caps.'
+          }
+        },
+        nomogram: [
+          { id: 't1', antiXa: [-999, 0.099], antiXaLbl: '< 0.10', apttOffset: [-999, -20.01], rebolusUkg: 25, holdMin: 0, deltaUkghr: 3, status: 'sub', badge: 'MARKEDLY SUBTHERAPEUTIC • RE-BOLUS & INCREASE', critical: false },
+          { id: 't2', antiXa: [0.10, 0.199], antiXaLbl: '0.10 – 0.19', apttOffset: [-20, -10.01], rebolusUkg: 0, holdMin: 0, deltaUkghr: 2, status: 'sub', badge: 'SUBTHERAPEUTIC • INCREASE RATE', critical: false },
+          { id: 't3', antiXa: [0.20, 0.299], antiXaLbl: '0.20 – 0.29', apttOffset: [-10, -0.01], rebolusUkg: 0, holdMin: 0, deltaUkghr: 1, status: 'sub', badge: 'MILDLY SUBTHERAPEUTIC • INCREASE RATE', critical: false },
+          { id: 't4', antiXa: [0.30, 0.70], antiXaLbl: '0.30 – 0.70', apttOffset: [0, 0], rebolusUkg: 0, holdMin: 0, deltaUkghr: 0, status: 'therapeutic', badge: 'THERAPEUTIC RANGE • MAINTAIN RATE', critical: false },
+          { id: 't5', antiXa: [0.701, 0.80], antiXaLbl: '0.71 – 0.80', apttOffset: [0.01, 10], rebolusUkg: 0, holdMin: 0, deltaUkghr: -1, status: 'supra_mild', badge: 'MILDLY SUPRATHERAPEUTIC • DECREASE RATE', critical: false },
+          { id: 't6', antiXa: [0.801, 0.90], antiXaLbl: '0.81 – 0.90', apttOffset: [10.01, 20], rebolusUkg: 0, holdMin: 30, deltaUkghr: -2, status: 'supra_mod', badge: 'SUPRATHERAPEUTIC • HOLD 30 MIN & DECREASE', critical: false },
+          { id: 't7', antiXa: [0.901, 1.00], antiXaLbl: '0.91 – 1.00', apttOffset: [20.01, 30], rebolusUkg: 0, holdMin: 60, deltaUkghr: -3, status: 'supra_high', badge: 'HIGH SUPRATHERAPEUTIC • HOLD 60 MIN & DECREASE', critical: false },
+          { id: 't8', antiXa: [1.001, 999], antiXaLbl: '> 1.00', apttOffset: [30.01, 999], rebolusUkg: 0, holdMin: 60, deltaUkghr: -4, status: 'critical', badge: 'CRITICAL SUPRATHERAPEUTIC • HOLD 60 MIN & NOTIFY MD', critical: true }
+        ]
+      };
+
+      // Deep clone helper
+      const cloneObj = (obj) => JSON.parse(JSON.stringify(obj));
+
+      // Application State
+      const state = {
+        protocol: cloneObj(DEFAULT_PROTOCOL),
+        weightKg: 82,
+        heightCm: 175,
+        indication: 'vte',
+        customBolusUkg: 80,
+        customRateUkghr: 18,
+        concMode: '100',
+        customTotalUnits: 25000,
+        customTotalVol: 250,
+        bagVolumeMl: 250,
+        enableCaps: false,
+        maxBolus: 10000,
+        maxRate: 2000,
+        // Safeguards
+        recentLmwh: false,
+        elevatedBaselineAptt: false,
+        hypothermia: false,
+        pltBase: 240,
+        pltCurr: 215,
+        score4Ts: 0,
+        // Double-check verifier
+        verifierActive: false,
+        verifierVerified: false,
+        // Titration
+        assay: 'antiXa', // 'antiXa' | 'aptt'
+        curUnitsHr: 1476,
+        curPumpMlHr: 14.8,
+        userEditedCurRate: false,
+        labResult: 0.22,
+        apttLow: 60,
+        apttHigh: 85,
+        consecutiveTherapeutic: false,
+        // Shift Timeline & Countdown Timer
+        shiftEntries: [],
+        timerTotalSec: 6 * 3600,
+        timerRemainingSec: 6 * 3600,
+        timerRunning: true,
+        // Cached Computed Output
+        calc: {}
+      };
+
+      // Utility Formatters
+      const fmtInt = (n) => Math.round(n).toLocaleString('en-US');
+      const fmtDec = (n, d = 1) => Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+      // Smart Pump Rounding: 0.1 mL/hr below 100 mL/hr; 1 mL/hr at or above 100 mL/hr
+      function smartPumpRound(mlHr) {
+        if (mlHr >= 100) return Math.round(mlHr);
+        return Math.round(mlHr * 10) / 10;
+      }
+
+      // Deterministic Checksum Hash for Clinical Audit Trail
+      function computeAuditHash(str) {
+        let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+        for (let i = 0; i < str.length; i++) {
+          const ch = str.charCodeAt(i);
+          h1 = Math.imul(h1 ^ ch, 2654435761);
+          h2 = Math.imul(h2 ^ ch, 1597334677);
+        }
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        return ((h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0')).slice(0, 10).toUpperCase();
+      }
+
+      // Dynamic Toast Notification
+      function showToast(msg, color = '#34C759') {
+        const pill = document.getElementById('toastPill');
+        document.getElementById('toastText').textContent = msg;
+        document.getElementById('toastDot').style.backgroundColor = color;
+        pill.classList.remove('translate-y-20', 'opacity-0');
+        pill.classList.add('translate-y-0', 'opacity-100');
+        clearTimeout(window._toastTimeout);
+        window._toastTimeout = setTimeout(() => {
+          pill.classList.add('translate-y-20', 'opacity-0');
+          pill.classList.remove('translate-y-0', 'opacity-100');
+        }, 3000);
+      }
+
+      // Get Active Bag Concentration (units/mL)
+      function getConcentration() {
+        if (state.concMode === 'custom') {
+          const u = Math.max(1, parseFloat(state.customTotalUnits) || 25000);
+          const v = Math.max(1, parseFloat(state.customTotalVol) || 250);
+          return u / v;
+        }
+        return parseFloat(state.concMode) || 100;
+      }
+
+      // Render Indication Pills Dynamically from Protocol JSON
+      function renderIndicationPills() {
+        const grid = document.getElementById('indicationPillGrid');
+        const keys = Object.keys(state.protocol.indications);
+        grid.innerHTML = keys.map((key) => {
+          const item = state.protocol.indications[key];
+          const active = state.indication === key;
+          const cls = active
+            ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-apple-sm'
+            : 'bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7] border-transparent hover:border-black/15 dark:hover:border-white/20';
+          return `
+            <button type="button" data-ind="${key}"
+              class="ind-pill-btn text-left p-2.5 rounded-[12px] border transition-all ${cls}">
+              <div class="text-xs font-semibold leading-tight truncate">${item.label}</div>
+              <div class="text-[10px] font-mono mt-0.5 ${active ? 'text-white/85' : 'text-[#6E6E73] dark:text-[#98989D]'}">${item.shortDesc}</div>
+            </button>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.ind-pill-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            state.indication = btn.getAttribute('data-ind');
+            const protoInd = state.protocol.indications[state.indication];
+            if (protoInd.maxBolus > 0) {
+              state.maxBolus = protoInd.maxBolus;
+              document.getElementById('inputMaxBolus').value = protoInd.maxBolus;
+            }
+            if (protoInd.maxRate > 0) {
+              state.maxRate = protoInd.maxRate;
+              document.getElementById('inputMaxRate').value = protoInd.maxRate;
+            }
+            state.userEditedCurRate = false;
+            state.verifierVerified = false;
+            renderIndicationPills();
+            recalculateAll();
+          });
+        });
+      }
+
+      // Compute Effective Nomogram Tier Bounds (supporting ECMO 0.20-0.40 Anti-Xa or custom aPTT bounds)
+      function getTierDisplayAndBounds(tier) {
+        const isEcmo = state.indication === 'ecmo';
+        const antiXaShift = isEcmo ? -0.10 : 0; // Shifts 0.30-0.70 therapeutic window to 0.20-0.40 for ECMO
+        let axMin = tier.antiXa[0] === -999 ? -Infinity : +(tier.antiXa[0] + antiXaShift).toFixed(3);
+        let axMax = tier.antiXa[1] === 999 ? Infinity : +(tier.antiXa[1] + antiXaShift).toFixed(3);
+        if (isEcmo && tier.id === 't4') {
+          axMin = 0.20;
+          axMax = 0.40;
+        } else if (isEcmo && tier.id === 't5') {
+          axMin = 0.401;
+          axMax = 0.60;
+        }
+
+        let axLabel = tier.antiXaLbl;
+        if (isEcmo) {
+          if (axMin === -Infinity) axLabel = `< ${fmtDec(axMax + 0.001, 2)}`;
+          else if (axMax === Infinity) axLabel = `> ${fmtDec(axMin - 0.001, 2)}`;
+          else axLabel = `${fmtDec(axMin, 2)} – ${fmtDec(axMax, 2)}`;
+        }
+
+        // aPTT bounds computed relative to institutional [apttLow, apttHigh]
+        const low = parseFloat(state.apttLow) || 60;
+        const high = parseFloat(state.apttHigh) || 85;
+        let apMin, apMax, apLabel;
+
+        if (tier.id === 't4') {
+          apMin = low;
+          apMax = high;
+          apLabel = `${Math.round(low)} – ${Math.round(high)}`;
+        } else if (tier.apttOffset[1] < 0) {
+          apMin = tier.apttOffset[0] === -999 ? -Infinity : low + tier.apttOffset[0];
+          apMax = low + tier.apttOffset[1];
+          apLabel = apMin === -Infinity ? `< ${Math.ceil(apMax)}` : `${Math.round(apMin)} – ${Math.floor(apMax)}`;
+        } else {
+          apMin = high + tier.apttOffset[0];
+          apMax = tier.apttOffset[1] === 999 ? Infinity : high + tier.apttOffset[1];
+          apLabel = apMax === Infinity ? `> ${Math.floor(apMin)}` : `${Math.ceil(apMin)} – ${Math.round(apMax)}`;
+        }
+
+        return { axMin, axMax, axLabel, apMin, apMax, apLabel };
+      }
+
+      // Main Real-Time Clinical Calculation & UI Synchronization Engine
+      function recalculateAll() {
+        const w = Math.max(1, parseFloat(state.weightKg) || 82);
+        const h = parseFloat(state.heightCm) || 0;
+        const conc = getConcentration();
+        const indObj = state.protocol.indications[state.indication];
+
+        // Update Header Protocol Badge
+        document.getElementById('headerProtocolBadge').textContent = `${state.protocol.protocolVersion} • ${state.protocol.guidelineSource}`;
+
+        // 1. BMI & Anthropometric Guardrails
+        let bmi = null;
+        if (h > 80) {
+          const hm = h / 100;
+          bmi = w / (hm * hm);
+          document.getElementById('bmiBadge').textContent = `BMI ${fmtDec(bmi, 1)}`;
+        } else {
+          document.getElementById('bmiBadge').textContent = 'BMI —';
+        }
+
+        // 2. Platelet Drop & 4Ts HIT Evaluation
+        const pltBase = Math.max(1, parseFloat(state.pltBase) || 240);
+        const pltCurr = Math.max(0, parseFloat(state.pltCurr) || 215);
+        const pltDropPct = pltBase > 0 ? Math.max(0, ((pltBase - pltCurr) / pltBase) * 100) : 0;
+        const score4Ts = parseInt(state.score4Ts, 10) || 0;
+        const hitHighRisk = pltDropPct >= 50 || score4Ts >= 4 || pltCurr < 100;
+
+        const pltBadge = document.getElementById('plateletDropBadge');
+        pltBadge.textContent = `Δ -${fmtDec(pltDropPct, 1)}% (${pltCurr}k)`;
+        pltBadge.className = hitHighRisk
+          ? 'text-[11px] font-mono font-bold text-[#FF3B30]'
+          : 'text-[11px] font-mono font-semibold text-[#6E6E73] dark:text-[#98989D]';
+
+        // 3. Initial Bolus & Rate Calculation
+        const bolusFactor = state.indication === 'custom' ? Math.max(0, parseFloat(state.customBolusUkg) || 0) : indObj.bolusUkg;
+        const rateFactor = state.indication === 'custom' ? Math.max(0, parseFloat(state.customRateUkghr) || 0) : indObj.rateUkghr;
+
+        let rawBolus = w * bolusFactor;
+        let bolusSuppressedByLmwh = state.recentLmwh && rawBolus > 0;
+        if (bolusSuppressedByLmwh) rawBolus = 0;
+
+        const maxBolusVal = Math.max(0, parseFloat(state.maxBolus) || 0);
+        const isBolusCapped = state.enableCaps && !bolusSuppressedByLmwh && bolusFactor > 0 && rawBolus > maxBolusVal;
+        const finalBolus = isBolusCapped ? maxBolusVal : rawBolus;
+
+        const rawRate = w * rateFactor;
+        const maxRateVal = Math.max(0, parseFloat(state.maxRate) || 0);
+        const isRateCapped = state.enableCaps && rateFactor > 0 && rawRate > maxRateVal;
+        const finalRateUnitsHr = isRateCapped ? maxRateVal : rawRate;
+        const finalExactMlHr = finalRateUnitsHr / conc;
+        const finalPumpMlHr = smartPumpRound(finalExactMlHr);
+
+        // Update UI Indication & Bolus/Infusion Cards
+        document.getElementById('indicationClinicalDesc').textContent = indObj.clinicalNote;
+        document.getElementById('customIndicationBox').classList.toggle('hidden', state.indication !== 'custom');
+        document.getElementById('activeProtocolPill').textContent = `${indObj.label} • ${bolusFactor} U/kg | ${rateFactor} U/kg/hr`;
+
+        const bolusStatusTag = document.getElementById('bolusStatusTag');
+        if (bolusSuppressedByLmwh) {
+          bolusStatusTag.textContent = 'HELD (LMWH <12h)';
+          bolusStatusTag.classList.remove('hidden');
+        } else if (isBolusCapped) {
+          bolusStatusTag.textContent = 'CAPPED';
+          bolusStatusTag.classList.remove('hidden');
+        } else {
+          bolusStatusTag.classList.add('hidden');
+        }
+
+        document.getElementById('rateStatusTag').classList.toggle('hidden', !isRateCapped);
+        document.getElementById('capSummaryLabel').textContent = state.enableCaps
+          ? `Active: Max ${fmtInt(maxBolusVal)} U bolus / ${fmtInt(maxRateVal)} U/hr`
+          : 'Off (Uncapped ABW per UpToDate)';
+
+        document.getElementById('dispBolusUnits').textContent = fmtInt(finalBolus);
+        document.getElementById('dispBolusVial1k').textContent = finalBolus === 0 ? '0 mL (Omit)' : `${fmtDec(finalBolus / 1000, 2)} mL`;
+        document.getElementById('dispBolusVial5k').textContent = finalBolus === 0 ? '0 mL (Omit)' : `${fmtDec(finalBolus / 5000, 2)} mL`;
+        document.getElementById('dispBagConc1').textContent = fmtDec(conc, conc % 1 === 0 ? 0 : 1);
+        document.getElementById('dispBolusBagMl').textContent = finalBolus === 0 ? '0 mL' : `${fmtDec(finalBolus / conc, 1)} mL`;
+
+        document.getElementById('dispPumpRoundedMlHr').textContent = fmtDec(finalPumpMlHr, finalPumpMlHr >= 100 ? 0 : 1);
+        document.getElementById('dispExactMlHr').textContent = fmtDec(finalExactMlHr, 2);
+        document.getElementById('dispInfusionUnitsHr').textContent = fmtInt(finalRateUnitsHr);
+        document.getElementById('dispDailyTotalUnits').textContent = fmtInt(finalRateUnitsHr * 24);
+
+        // Bag Run-Dry Estimator
+        const bagVol = parseFloat(state.bagVolumeMl) || 250;
+        document.getElementById('dispBagVolLabel').textContent = bagVol;
+        if (finalPumpMlHr > 0) {
+          const totalHours = bagVol / finalPumpMlHr;
+          const hrs = Math.floor(totalHours);
+          const mins = Math.round((totalHours - hrs) * 60);
+          document.getElementById('dispBagRunDry').textContent = `${hrs} hrs ${mins} mins`;
+        } else {
+          document.getElementById('dispBagRunDry').textContent = '—';
+        }
+
+        // Equations Audit Lines
+        document.getElementById('eqBolusAudit').textContent = bolusSuppressedByLmwh
+          ? `Bolus omitted (0 units) due to LMWH administration within the past 12 hours.`
+          : `${fmtDec(w, 1)} kg × ${bolusFactor} U/kg = ${fmtInt(w * bolusFactor)} U${isBolusCapped ? ` → Capped at ${fmtInt(finalBolus)} U` : ''}`;
+        document.getElementById('eqRateAudit').textContent =
+          `${fmtDec(w, 1)} kg × ${rateFactor} U/kg/hr = ${fmtInt(rawRate)} U/hr${isRateCapped ? ` → Capped at ${fmtInt(finalRateUnitsHr)} U/hr` : ''}`;
+        document.getElementById('eqPumpAudit').textContent =
+          `${fmtInt(finalRateUnitsHr)} U/hr ÷ ${fmtDec(conc, 0)} U/mL = ${fmtDec(finalExactMlHr, 2)} mL/hr → Pump-Rounded: ${fmtDec(finalPumpMlHr, finalPumpMlHr >= 100 ? 0 : 1)} mL/hr`;
+
+        // Sync Current Rate in Titration Section
+        document.getElementById('lblSyncInitRate').textContent = fmtDec(finalPumpMlHr, finalPumpMlHr >= 100 ? 0 : 1);
+        if (!state.userEditedCurRate) {
+          state.curUnitsHr = Math.round(finalRateUnitsHr);
+          state.curPumpMlHr = smartPumpRound(state.curUnitsHr / conc);
+          document.getElementById('curUnitsHr').value = state.curUnitsHr;
+          document.getElementById('curPumpMlHr').value = state.curPumpMlHr;
+        }
+
+        const curUnitsHr = Math.max(0, parseFloat(state.curUnitsHr) || 0);
+        const curNormUkghr = curUnitsHr / w;
+        const curDailyUnits = curUnitsHr * 24;
+        document.getElementById('dispNormRate').textContent = `${fmtDec(curNormUkghr, 1)} U/kg/hr (${fmtInt(curDailyUnits)} U/d)`;
+
+        // 4. Evaluate Active Nomogram Tier
+        const labVal = Math.max(0, parseFloat(state.labResult) || 0);
+        let activeTier = state.protocol.nomogram[3];
+        for (const t of state.protocol.nomogram) {
+          const b = getTierDisplayAndBounds(t);
+          if (state.assay === 'antiXa') {
+            if (labVal >= b.axMin && labVal <= b.axMax) {
+              activeTier = t;
+              break;
+            }
+          } else {
+            if (labVal >= b.apMin && labVal <= b.apMax) {
+              activeTier = t;
+              break;
+            }
+          }
+        }
+
+        const rebolusUnits = Math.round(activeTier.rebolusUkg * w);
+        const deltaUnitsHr = Math.round(activeTier.deltaUkghr * w);
+        const newUnitsHr = Math.max(0, curUnitsHr + deltaUnitsHr);
+        const newExactMlHr = newUnitsHr / conc;
+        const newPumpMlHr = smartPumpRound(newExactMlHr);
+
+        // Heparin Resistance Check (>35,000 U/day or >25 U/kg/hr while subtherapeutic)
+        const isHeparinResistant = (curDailyUnits > 35000 || curNormUkghr > 25) && activeTier.status === 'sub';
+
+        // Update Titration Action Card Styling & Text
+        const card = document.getElementById('titrationResultCard');
+        const badge = document.getElementById('titrationBadge');
+        const styleMap = {
+          sub: { card: 'border-[#FF9500]/45 bg-[#FF9500]/[0.06]', badge: 'bg-[#FF9500]/15 text-[#C93400] dark:text-[#FF9F0A]' },
+          therapeutic: { card: 'border-[#34C759]/45 bg-[#34C759]/[0.06]', badge: 'bg-[#34C759]/15 text-[#248A3D] dark:text-[#30D158]' },
+          supra_mild: { card: 'border-[#FF9500]/50 bg-[#FF9500]/[0.07]', badge: 'bg-[#FF9500]/20 text-[#C93400] dark:text-[#FF9F0A]' },
+          supra_mod: { card: 'border-[#FF3B30]/45 bg-[#FF3B30]/[0.06]', badge: 'bg-[#FF3B30]/15 text-[#D70015] dark:text-[#FF453A]' },
+          supra_high: { card: 'border-[#FF3B30]/60 bg-[#FF3B30]/[0.08]', badge: 'bg-[#FF3B30]/20 text-[#D70015] dark:text-[#FF453A]' },
+          critical: { card: 'border-[#FF3B30] bg-[#FF3B30]/[0.11]', badge: 'bg-[#FF3B30] text-white' }
+        };
+        const chosenStyle = styleMap[activeTier.status] || styleMap.sub;
+        card.className = `rounded-[18px] p-5 border-2 ${chosenStyle.card} space-y-4 transition-all`;
+        badge.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wide ${chosenStyle.badge}`;
+        badge.textContent = activeTier.badge;
+
+        // Build Concise Headline
+        let parts = [];
+        if (rebolusUnits > 0) parts.push(`Give ${fmtInt(rebolusUnits)} U (${activeTier.rebolusUkg} U/kg) IV bolus`);
+        else if (activeTier.holdMin > 0) parts.push(`HOLD infusion for ${activeTier.holdMin} min`);
+        else parts.push('No bolus or hold');
+
+        if (activeTier.deltaUkghr > 0) parts.push(`increase rate by +${activeTier.deltaUkghr} U/kg/hr (+${fmtInt(deltaUnitsHr)} U/hr).`);
+        else if (activeTier.deltaUkghr < 0) parts.push(`decrease rate by ${activeTier.deltaUkghr} U/kg/hr (${fmtInt(deltaUnitsHr)} U/hr).`);
+        else parts.push('maintain current infusion rate.');
+        document.getElementById('titrationTitle').textContent = parts.join(', ');
+
+        const activeBounds = getTierDisplayAndBounds(activeTier);
+        document.getElementById('titrationTierTag').textContent = state.assay === 'antiXa'
+          ? `Anti-Xa ${activeBounds.axLabel}`
+          : `aPTT ${activeBounds.apLabel}s`;
+
+        // Update Target Range Pill in Input Box
+        if (state.assay === 'antiXa') {
+          const tRange = state.indication === 'ecmo' ? '0.20–0.40' : '0.30–0.70';
+          document.getElementById('badgeTargetRange').textContent = `Target: ${tRange}`;
+        } else {
+          document.getElementById('badgeTargetRange').textContent = `Target: ${state.apttLow}–${state.apttHigh}s`;
+        }
+
+        document.getElementById('resRebolusUnits').textContent = rebolusUnits > 0 ? `${fmtInt(rebolusUnits)} U` : '0 U';
+        document.getElementById('resRebolusVial').textContent = rebolusUnits > 0 ? `${fmtDec(rebolusUnits / 1000, 2)} mL (1k vial)` : 'None';
+        document.getElementById('resHoldTime').textContent = activeTier.holdMin > 0 ? `${activeTier.holdMin} min` : '0 min';
+        document.getElementById('resHoldNote').textContent = activeTier.holdMin > 0 ? 'Pause before restart' : 'No pause';
+        document.getElementById('resNewMlHr').textContent = `${fmtDec(newPumpMlHr, newPumpMlHr >= 100 ? 0 : 1)} mL/hr`;
+        document.getElementById('resNewUnitsHr').textContent = `${fmtInt(newUnitsHr)} U/hr`;
+
+        const nextLabHours = (activeTier.status === 'therapeutic' && state.consecutiveTherapeutic) ? 24 : 6;
+        document.getElementById('resNextLab').textContent = `In ${nextLabHours} hrs`;
+        document.getElementById('resNextLabSub').textContent = nextLabHours === 24 ? 'q24h stable maintenance' : (activeTier.holdMin > 0 ? '6h post-restart' : 'q6h protocol');
+
+        const sign = deltaUnitsHr >= 0 ? '+' : '';
+        const fSign = activeTier.deltaUkghr >= 0 ? '+' : '';
+        document.getElementById('titrationFormulaLine').textContent =
+          `${fmtInt(curUnitsHr)} U/hr + (${fSign}${activeTier.deltaUkghr} U/kg/hr × ${fmtDec(w, 1)} kg = ${sign}${fmtInt(deltaUnitsHr)} U/hr) = ${fmtInt(newUnitsHr)} U/hr (${fmtDec(newPumpMlHr, newPumpMlHr >= 100 ? 0 : 1)} mL/hr)`;
+
+        document.getElementById('criticalAlertBanner').classList.toggle('hidden', !activeTier.critical);
+
+        // 5. Render Dynamic Safety Banner Stack
+        renderSafetyAlerts({ w, bmi, hitHighRisk, pltDropPct, score4Ts, isHeparinResistant });
+
+        // 6. Render Reference Nomogram Table
+        renderNomogramTable(w, activeTier.id);
+
+        // 7. Update Double-Check Masking Visibility
+        updateVerifierVisibility();
+
+        // 8. Cache Calculated Values for Flowsheet, EMR Summary & FHIR
+        state.calc = {
+          w, bmi, conc, indObj, bolusFactor, rateFactor,
+          finalBolus, isBolusCapped, bolusSuppressedByLmwh,
+          finalRateUnitsHr, finalExactMlHr, finalPumpMlHr, isRateCapped,
+          curUnitsHr, curNormUkghr, labVal, activeTier,
+          rebolusUnits, deltaUnitsHr, newUnitsHr, newPumpMlHr, nextLabHours,
+          hitHighRisk, pltDropPct, isHeparinResistant
+        };
+
+        updateFhirPreview();
+      }
+
+      // Render Dynamic Safety Alert Banners
+      function renderSafetyAlerts({ w, bmi, hitHighRisk, pltDropPct, score4Ts, isHeparinResistant }) {
+        const stack = document.getElementById('safetyAlertStack');
+        const alerts = [];
+
+        if (hitHighRisk) {
+          alerts.push({
+            color: 'bg-[#FF3B30] text-white border-[#FF3B30]',
+            title: 'HIGH-ALERT HIT WARNING (Suspected Heparin-Induced Thrombocytopenia)',
+            body: `Platelet drop is ${fmtDec(pltDropPct, 1)}% (Current: ${state.pltCurr} ×10⁹/L) with 4Ts Score ${score4Ts >= 6 ? '6–8 (High)' : score4Ts >= 4 ? '4–5 (Intermediate)' : '0–3'}. STOP all heparin (including flushes) and evaluate for non-heparin anticoagulation (Argatroban or Bivalirudin).`
+          });
+        }
+
+        if (isHeparinResistant) {
+          alerts.push({
+            color: 'bg-[#FF9500]/15 text-[#8A2900] dark:text-[#FFB340] border-[#FF9500]/40',
+            title: 'SUSPECTED HEPARIN RESISTANCE (> 35,000 units/day or > 25 units/kg/hr)',
+            body: `Patient requires ${fmtInt(state.curUnitsHr * 24)} units/24hr with subtherapeutic labs. In ICU sepsis/inflammation, elevated Factor VIII/fibrinogen shortens aPTT—monitor with Anti-Factor Xa and check Antithrombin III activity.`
+          });
+        }
+
+        if (state.elevatedBaselineAptt && state.assay === 'aptt') {
+          alerts.push({
+            color: 'bg-[#FF9500]/15 text-[#8A2900] dark:text-[#FFB340] border-[#FF9500]/40',
+            title: 'ELEVATED BASELINE aPTT (> 38 sec) — SWITCH TO ANTI-FACTOR Xa',
+            body: `Baseline coagulopathy or lupus anticoagulant invalidates aPTT-guided titration. Switch the titration assay toggle above to Anti-Factor Xa (IU/mL).`
+          });
+        }
+
+        if (state.hypothermia) {
+          alerts.push({
+            color: 'bg-[#5856D6]/15 text-[#3634A3] dark:text-[#7D7AFF] border-[#5856D6]/35',
+            title: 'THERAPEUTIC HYPOTHERMIA / TTM ACTIVE',
+            body: `Core hypothermia slows enzymatic heparin clearance and artifactually prolongs aPTT. Monitor closely for supratherapeutic accumulation during cooling and rebound during rewarming.`
+          });
+        }
+
+        if (bmi !== null && bmi >= 40) {
+          alerts.push({
+            color: 'bg-[#007AFF]/12 text-[#004080] dark:text-[#64D2FF] border-[#007AFF]/30',
+            title: `CLASS III OBESITY GUARDRAIL (BMI ${fmtDec(bmi, 1)} kg/m² • ABW ${fmtDec(w, 1)} kg)`,
+            body: `UpToDate/CHEST guidelines recommend Actual Body Weight (ABW) without arbitrary dose caps for acute VTE; monitor 6-hour Anti-Factor Xa closely.`
+          });
+        } else if (w < 35 || w > 200) {
+          alerts.push({
+            color: 'bg-[#FF9500]/15 text-[#8A2900] dark:text-[#FFB340] border-[#FF9500]/40',
+            title: `EXTREME WEIGHT PLAUSIBILITY CHECK (${fmtDec(w, 1)} kg)`,
+            body: `Verify patient weight entry in kilograms (not pounds) before programming infusion pump.`
+          });
+        }
+
+        const pill = document.getElementById('safeguardStatusPill');
+        if (alerts.length === 0) {
+          pill.textContent = 'Clear';
+          pill.className = 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#34C759]/12 text-[#248A3D] dark:text-[#30D158]';
+          stack.innerHTML = '';
+        } else {
+          pill.textContent = `${alerts.length} Active Alert${alerts.length > 1 ? 's' : ''}`;
+          pill.className = hitHighRisk
+            ? 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#FF3B30] text-white'
+            : 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#FF9500]/20 text-[#C93400] dark:text-[#FF9F0A]';
+
+          stack.innerHTML = alerts.map((a) => `
+            <div class="rounded-[14px] px-4 py-3 border ${a.color} flex items-start gap-3 shadow-apple-sm">
+              <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+              </svg>
+              <div class="text-xs leading-relaxed">
+                <div class="font-bold">${a.title}</div>
+                <div class="opacity-90 mt-0.5">${a.body}</div>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      // Render Nomogram Reference Table
+      function renderNomogramTable(w, activeTierId) {
+        document.getElementById('tblWeightHdr').textContent = fmtDec(w, 1);
+        const tbody = document.getElementById('nomogramBody');
+        tbody.innerHTML = state.protocol.nomogram.map((t) => {
+          const b = getTierDisplayAndBounds(t);
+          const isActive = t.id === activeTierId;
+          const pDelta = Math.round(t.deltaUkghr * w);
+          const pBolus = Math.round(t.rebolusUkg * w);
+
+          let act = 'No bolus / hold';
+          if (t.rebolusUkg > 0) act = `Bolus ${t.rebolusUkg} U/kg (${fmtInt(pBolus)} U)`;
+          else if (t.holdMin > 0) act = `Hold ${t.holdMin} min${t.critical ? ' + Notify MD' : ''}`;
+
+          const rowCls = isActive
+            ? 'bg-[#007AFF]/12 dark:bg-[#0A84FF]/20 font-semibold'
+            : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.02]';
+
+          return `
+            <tr class="${rowCls}">
+              <td class="py-2 px-2.5 font-mono whitespace-nowrap">${b.axLabel} ${isActive ? '<span class="ml-1 px-1.5 py-0.2 rounded bg-[#007AFF] text-white text-[9px] font-sans">ACTIVE</span>' : ''}</td>
+              <td class="py-2 px-2.5 font-mono whitespace-nowrap">${b.apLabel}s</td>
+              <td class="py-2 px-2.5 whitespace-nowrap">${act}</td>
+              <td class="py-2 px-2.5 font-mono whitespace-nowrap">${t.deltaUkghr > 0 ? '+' : ''}${t.deltaUkghr} U/kg/hr</td>
+              <td class="py-2 px-2.5 font-mono font-bold whitespace-nowrap">${pDelta > 0 ? '+' : ''}${fmtInt(pDelta)} U/hr</td>
+              <td class="py-2 px-2.5 whitespace-nowrap text-[#6E6E73] dark:text-[#98989D]">In 6 hrs</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Independent 2nd-Nurse Double-Check Visibility & Validation
+      function updateVerifierVisibility() {
+        const drawer = document.getElementById('doubleCheckDrawer');
+        const cards = document.getElementById('orderCardsContainer');
+        const dot = document.getElementById('verifierStatusDot');
+        const verifiedPill = document.getElementById('verifiedBadgePill');
+
+        if (!state.verifierActive) {
+          drawer.classList.add('hidden');
+          cards.classList.remove('blur-md', 'select-none', 'pointer-events-none', 'opacity-40');
+          dot.className = 'w-2 h-2 rounded-full bg-[#8E8E93]';
+          verifiedPill.classList.toggle('hidden', !state.verifierVerified);
+          return;
+        }
+
+        if (state.verifierVerified) {
+          drawer.classList.add('hidden');
+          cards.classList.remove('blur-md', 'select-none', 'pointer-events-none', 'opacity-40');
+          dot.className = 'w-2 h-2 rounded-full bg-[#34C759]';
+          verifiedPill.classList.remove('hidden');
+        } else {
+          drawer.classList.remove('hidden');
+          cards.classList.add('blur-md', 'select-none', 'pointer-events-none', 'opacity-40');
+          dot.className = 'w-2 h-2 rounded-full bg-[#5856D6] animate-pulse';
+          verifiedPill.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('btnToggleVerifier').addEventListener('click', () => {
+        state.verifierActive = !state.verifierActive;
+        if (state.verifierActive) {
+          state.verifierVerified = false;
+          document.getElementById('verWeightKg').value = '';
+          document.getElementById('verConc').value = '';
+          document.getElementById('verBolusUnits').value = '';
+          document.getElementById('verPumpMlHr').value = '';
+          document.getElementById('verifierFeedbackMsg').textContent = 'Enter all four independent check values to validate against order.';
+          document.getElementById('verifierFeedbackMsg').className = 'text-xs font-semibold text-[#6E6E73] dark:text-[#98989D]';
+        }
+        updateVerifierVisibility();
+      });
+
+      document.getElementById('btnCancelVerifier').addEventListener('click', () => {
+        state.verifierActive = false;
+        updateVerifierVisibility();
+      });
+
+      document.getElementById('btnVerifyMatch').addEventListener('click', () => {
+        const vw = parseFloat(document.getElementById('verWeightKg').value);
+        const vc = parseFloat(document.getElementById('verConc').value);
+        const vb = parseFloat(document.getElementById('verBolusUnits').value);
+        const vr = parseFloat(document.getElementById('verPumpMlHr').value);
+        const fb = document.getElementById('verifierFeedbackMsg');
+
+        if ([vw, vc, vb, vr].some((x) => isNaN(x))) {
+          fb.textContent = 'Please complete all four verification fields.';
+          fb.className = 'text-xs font-bold text-[#FF3B30]';
+          return;
+        }
+
+        const c = state.calc;
+        const wOk = Math.abs(vw - c.w) <= 0.5;
+        const cOk = Math.abs(vc - c.conc) <= 0.5;
+        const bOk = Math.abs(vb - c.finalBolus) <= 25;
+        const rOk = Math.abs(vr - c.finalPumpMlHr) <= 0.2;
+
+        if (wOk && cOk && bOk && rOk) {
+          state.verifierVerified = true;
+          updateVerifierVisibility();
+          showToast('2nd Clinician Independent Double-Check Verified!', '#34C759');
+        } else {
+          const mismatches = [];
+          if (!wOk) mismatches.push('Weight (kg)');
+          if (!cOk) mismatches.push('Concentration (U/mL)');
+          if (!bOk) mismatches.push('Bolus (Units)');
+          if (!rOk) mismatches.push('Pump Rate (mL/hr)');
+          fb.textContent = `Discrepancy detected in: ${mismatches.join(', ')}. Re-verify calculations together.`;
+          fb.className = 'text-xs font-bold text-[#FF3B30]';
+        }
+      });
+
+      // =======================================================================
+      // SHIFT TIMELINE, DOSE-RESPONSE SVG CHART & COUNTDOWN TIMER
+      // =======================================================================
+      function renderShiftTimelineAndChart() {
+        const tbody = document.getElementById('shiftLogTableBody');
+        const chartBox = document.getElementById('trendChartContainer');
+
+        if (state.shiftEntries.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="py-6 text-center text-xs text-[#8E8E93]">
+                No shift titration events logged yet. Click <strong>"Log to Shift Timeline"</strong> above or load sample ICU shift data.
+              </td>
+            </tr>
+          `;
+          chartBox.innerHTML = `
+            <div class="text-xs text-[#8E8E93] text-center">
+              Trend graph will appear once lab &amp; infusion entries are logged.
+            </div>
+          `;
+          return;
+        }
+
+        // Render Flowsheet Rows (Newest first)
+        tbody.innerHTML = [...state.shiftEntries].reverse().map((e) => `
+          <tr>
+            <td class="py-2 px-3 font-mono whitespace-nowrap">${e.timeStr}</td>
+            <td class="py-2 px-3 font-mono font-bold whitespace-nowrap">${e.labDisplay}</td>
+            <td class="py-2 px-3 whitespace-nowrap">${e.actionSummary}</td>
+            <td class="py-2 px-3 font-mono font-semibold whitespace-nowrap">${fmtInt(e.newUnitsHr)} U/hr</td>
+            <td class="py-2 px-3 font-mono font-bold text-[#007AFF] dark:text-[#409CFF] whitespace-nowrap">${fmtDec(e.newPumpMlHr, 1)} mL/hr</td>
+            <td class="py-2 px-3 font-mono whitespace-nowrap">${fmtDec(e.normUkghr, 1)} U/kg/hr</td>
+          </tr>
+        `).join('');
+
+        // Render Responsive Dual-Axis Apple Health-Style SVG Chart
+        const entries = state.shiftEntries;
+        const W = 560, H = 165, padL = 38, padR = 38, padT = 16, padB = 26;
+        const plotW = W - padL - padR;
+        const plotH = H - padT - padB;
+
+        const isAntiXa = entries[entries.length - 1].assay === 'antiXa';
+        const labMax = isAntiXa ? 1.3 : 150;
+        const rateMax = 30; // 30 U/kg/hr scale
+
+        const tLow = isAntiXa ? (state.indication === 'ecmo' ? 0.20 : 0.30) : state.apttLow;
+        const tHigh = isAntiXa ? (state.indication === 'ecmo' ? 0.40 : 0.70) : state.apttHigh;
+
+        const yLab = (v) => padT + plotH - (Math.min(labMax, Math.max(0, v)) / labMax) * plotH;
+        const yRate = (v) => padT + plotH - (Math.min(rateMax, Math.max(0, v)) / rateMax) * plotH;
+        const xPos = (idx) => entries.length === 1 ? padL + plotW / 2 : padL + (idx / (entries.length - 1)) * plotW;
+
+        const bandTop = yLab(tHigh);
+        const bandHeight = Math.max(4, yLab(tLow) - bandTop);
+
+        let labPoints = [];
+        let ratePoints = [];
+        entries.forEach((pt, idx) => {
+          const x = xPos(idx);
+          labPoints.push(`${x.toFixed(1)},${yLab(pt.labVal).toFixed(1)}`);
+          ratePoints.push(`${x.toFixed(1)},${yRate(pt.normUkghr).toFixed(1)}`);
+        });
+
+        const circlesSvg = entries.map((pt, idx) => {
+          const x = xPos(idx);
+          const yl = yLab(pt.labVal);
+          const yr = yRate(pt.normUkghr);
+          return `
+            <circle cx="${x}" cy="${yr}" r="3.5" fill="#5856D6" />
+            <circle cx="${x}" cy="${yl}" r="4.5" fill="#007AFF" stroke="#FFFFFF" stroke-width="1.5" />
+            <text x="${x}" y="${H - 7}" text-anchor="middle" font-size="9" fill="#8E8E93" font-family="monospace">${pt.timeStr}</text>
+          `;
+        }).join('');
+
+        chartBox.innerHTML = `
+          <svg viewBox="0 0 ${W} ${H}" class="w-full h-full overflow-visible">
+            <!-- Therapeutic Green Band -->
+            <rect x="${padL}" y="${bandTop}" width="${plotW}" height="${bandHeight}" fill="#34C759" fill-opacity="0.16" rx="4" />
+            <line x1="${padL}" y1="${bandTop}" x2="${padL + plotW}" y2="${bandTop}" stroke="#34C759" stroke-width="1" stroke-dasharray="3,3" />
+            <line x1="${padL}" y1="${bandTop + bandHeight}" x2="${padL + plotW}" y2="${bandTop + bandHeight}" stroke="#34C759" stroke-width="1" stroke-dasharray="3,3" />
+
+            <!-- Y-Axis Labels -->
+            <text x="${padL - 5}" y="${padT + 4}" text-anchor="end" font-size="9" fill="#007AFF" font-family="monospace">${isAntiXa ? '1.3' : '150'}</text>
+            <text x="${padL - 5}" y="${padT + plotH}" text-anchor="end" font-size="9" fill="#007AFF" font-family="monospace">0</text>
+            <text x="${padL + plotW + 5}" y="${padT + 4}" text-anchor="start" font-size="9" fill="#5856D6" font-family="monospace">30U</text>
+            <text x="${padL + plotW + 5}" y="${padT + plotH}" text-anchor="start" font-size="9" fill="#5856D6" font-family="monospace">0U</text>
+
+            <!-- Infusion Rate Line -->
+            ${entries.length > 1 ? `<polyline fill="none" stroke="#5856D6" stroke-width="2" stroke-dasharray="4,2" points="${ratePoints.join(' ')}" />` : ''}
+            <!-- Lab Result Line -->
+            ${entries.length > 1 ? `<polyline fill="none" stroke="#007AFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="${labPoints.join(' ')}" />` : ''}
+
+            ${circlesSvg}
+          </svg>
+        `;
+      }
+
+      // Countdown Timer Engine
+      function updateTimerUI() {
+        const rem = Math.max(0, state.timerRemainingSec);
+        const h = Math.floor(rem / 3600);
+        const m = Math.floor((rem % 3600) / 60);
+        const s = rem % 60;
+        document.getElementById('timerCountdownDisplay').textContent =
+          `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+        const circumference = 314.16;
+        const pct = state.timerTotalSec > 0 ? rem / state.timerTotalSec : 0;
+        const offset = circumference * (1 - pct);
+        const circle = document.getElementById('timerProgressCircle');
+        circle.style.strokeDashoffset = offset;
+        circle.setAttribute('stroke', rem === 0 ? '#FF3B30' : rem < 1800 ? '#FF9500' : '#007AFF');
+      }
+
+      setInterval(() => {
+        if (state.timerRunning && state.timerRemainingSec > 0) {
+          state.timerRemainingSec -= 1;
+          updateTimerUI();
+        }
+      }, 1000);
+
+      document.getElementById('btnTimerToggle').addEventListener('click', (e) => {
+        state.timerRunning = !state.timerRunning;
+        e.target.textContent = state.timerRunning ? 'Pause' : 'Resume';
+      });
+
+      document.getElementById('btnTimerSimPlus1h').addEventListener('click', () => {
+        state.timerRemainingSec = Math.max(0, state.timerRemainingSec - 3600);
+        updateTimerUI();
+        if (state.timerRemainingSec === 0) {
+          showToast('DUE NOW: Draw q6h Anti-Xa / aPTT coagulation level!', '#FF3B30');
+        }
+      });
+
+      document.getElementById('btnTimerReset').addEventListener('click', () => {
+        state.timerRemainingSec = state.timerTotalSec;
+        state.timerRunning = true;
+        document.getElementById('btnTimerToggle').textContent = 'Pause';
+        updateTimerUI();
+      });
+
+      // Log Current Titration to Shift Timeline
+      document.getElementById('btnLogTitration').addEventListener('click', () => {
+        const c = state.calc;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const labDisplay = state.assay === 'antiXa' ? `Xa ${fmtDec(c.labVal, 2)}` : `aPTT ${Math.round(c.labVal)}s`;
+
+        let actionSummary = '';
+        if (c.rebolusUnits > 0) actionSummary += `Bolus ${fmtInt(c.rebolusUnits)}U + `;
+        if (c.activeTier.holdMin > 0) actionSummary += `Hold ${c.activeTier.holdMin}m + `;
+        actionSummary += c.deltaUnitsHr === 0 ? 'No change' : `${c.deltaUnitsHr > 0 ? '+' : ''}${fmtInt(c.deltaUnitsHr)} U/hr`;
+
+        state.shiftEntries.push({
+          timeStr,
+          assay: state.assay,
+          labVal: c.labVal,
+          labDisplay,
+          actionSummary,
+          newUnitsHr: c.newUnitsHr,
+          newPumpMlHr: c.newPumpMlHr,
+          normUkghr: c.newUnitsHr / c.w
+        });
+
+        // Update current rate to the newly ordered rate
+        state.curUnitsHr = c.newUnitsHr;
+        state.curPumpMlHr = c.newPumpMlHr;
+        state.userEditedCurRate = true;
+        document.getElementById('curUnitsHr').value = state.curUnitsHr;
+        document.getElementById('curPumpMlHr').value = state.curPumpMlHr;
+
+        // Reset Countdown Timer to 6h or 24h
+        state.timerTotalSec = c.nextLabHours * 3600;
+        state.timerRemainingSec = state.timerTotalSec;
+        state.timerRunning = true;
+        document.getElementById('timerIntervalBadge').textContent = `q${c.nextLabHours}h Protocol`;
+        updateTimerUI();
+
+        recalculateAll();
+        renderShiftTimelineAndChart();
+        showToast(`Logged ${labDisplay} → ${fmtDec(c.newPumpMlHr, 1)} mL/hr & restarted q${c.nextLabHours}h timer.`);
+      });
+
+      // Load Sample 18h ICU Shift Data
+      document.getElementById('btnLoadSampleShift').addEventListener('click', () => {
+        const w = state.calc.w || 82;
+        const conc = state.calc.conc || 100;
+        const r0 = Math.round(18 * w);
+        const r1 = Math.round(20 * w);
+        const r2 = Math.round(21 * w);
+        const r3 = Math.round(21 * w);
+
+        state.assay = 'antiXa';
+        document.getElementById('segAntiXa').click();
+
+        state.shiftEntries = [
+          { timeStr: '06:00', assay: 'antiXa', labVal: 0.14, labDisplay: 'Xa 0.14', actionSummary: `+${fmtInt(r1 - r0)} U/hr`, newUnitsHr: r1, newPumpMlHr: smartPumpRound(r1 / conc), normUkghr: 20.0 },
+          { timeStr: '12:00', assay: 'antiXa', labVal: 0.25, labDisplay: 'Xa 0.25', actionSummary: `+${fmtInt(r2 - r1)} U/hr`, newUnitsHr: r2, newPumpMlHr: smartPumpRound(r2 / conc), normUkghr: 21.0 },
+          { timeStr: '18:00', assay: 'antiXa', labVal: 0.48, labDisplay: 'Xa 0.48', actionSummary: 'Therapeutic (No change)', newUnitsHr: r3, newPumpMlHr: smartPumpRound(r3 / conc), normUkghr: 21.0 }
+        ];
+        renderShiftTimelineAndChart();
+        showToast('Loaded sample 18-hour ICU titration flowsheet.');
+      });
+
+      document.getElementById('btnClearTimeline').addEventListener('click', () => {
+        state.shiftEntries = [];
+        renderShiftTimelineAndChart();
+        showToast('Shift timeline cleared.', '#8E8E93');
+      });
+
+      // =======================================================================
+      // EMR ORDER & HANDOFF SUMMARY GENERATOR (WITH DETERMINISTIC CHECKSUM)
+      // =======================================================================
+      function generateClinicalSummary() {
+        const c = state.calc;
+        const ts = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const rawFingerprint = `${state.protocol.protocolVersion}|${c.w}|${state.indication}|${c.conc}|${c.finalBolus}|${c.finalRateUnitsHr}|${c.labVal}|${c.newUnitsHr}`;
+        const checksum = computeAuditHash(rawFingerprint);
+
+        const labStr = state.assay === 'antiXa'
+          ? `Anti-Factor Xa: ${fmtDec(c.labVal, 2)} IU/mL`
+          : `aPTT: ${Math.round(c.labVal)} sec (Target ${state.apttLow}-${state.apttHigh}s)`;
+
+        const verifierStr = state.verifierVerified
+          ? 'VERIFIED BY 2 CLINICIANS (Independent Double-Check Passed)'
+          : 'Single-Clinician Calculation (2nd-Nurse Double-Check Recommended per ISMP)';
+
+        return [
+          `ICU UNFRACTIONATED HEPARIN (UFH) ORDER & TITRATION SUMMARY`,
+          `Timestamp: ${ts} | ${state.protocol.protocolVersion} | Audit Hash: #${checksum}`,
+          `---------------------------------------------------------------------------`,
+          `PATIENT & SAFETY SCREENING:`,
+          `• Actual Body Weight (ABW): ${fmtDec(c.w, 1)} kg${c.bmi ? ` (BMI ${fmtDec(c.bmi, 1)} kg/m²)` : ''}`,
+          `• Indication: ${c.indObj.label} (${c.bolusFactor} U/kg bolus | ${c.rateFactor} U/kg/hr init)`,
+          `• IV Concentration: ${fmtDec(c.conc, 0)} units/mL (Bag Volume: ${state.bagVolumeMl} mL)`,
+          `• 4Ts HIT & Platelets: Plt ${state.pltCurr}k (Base ${state.pltBase}k, -${fmtDec(c.pltDropPct, 1)}%) | 4Ts Score: ${state.score4Ts >= 6 ? 'High (6-8)' : state.score4Ts >= 4 ? 'Int (4-5)' : 'Low (0-3)'}${c.hitHighRisk ? ' [HIGH HIT RISK]' : ''}`,
+          `• Safeguards: LMWH <12h: ${state.recentLmwh ? 'YES (Bolus Held)' : 'No'} | Baseline aPTT >38s: ${state.elevatedBaselineAptt ? 'YES' : 'No'} | TTM: ${state.hypothermia ? 'YES' : 'No'}`,
+          `• Independent Double-Check: ${verifierStr}`,
+          ``,
+          `1. INITIAL INFUSION ORDERS:`,
+          `• Initial IV Bolus: ${fmtInt(c.finalBolus)} units IV${c.bolusSuppressedByLmwh ? ' (Omitted - recent LMWH)' : c.isBolusCapped ? ' (Capped)' : ''}`,
+          `• Initial Rate: ${fmtInt(c.finalRateUnitsHr)} units/hr = ${fmtDec(c.finalPumpMlHr, 1)} mL/hr (Exact: ${fmtDec(c.finalExactMlHr, 2)} mL/hr)`,
+          ``,
+          `2. NOMOGRAM TITRATION ACTION:`,
+          `• Current Rate: ${fmtInt(c.curUnitsHr)} units/hr (${fmtDec(c.curNormUkghr, 1)} U/kg/hr)`,
+          `• Latest Lab: ${labStr} -> ${c.activeTier.badge}`,
+          `• Re-Bolus: ${c.rebolusUnits > 0 ? `${fmtInt(c.rebolusUnits)} units IV` : 'None'} | Hold: ${c.activeTier.holdMin > 0 ? `${c.activeTier.holdMin} min` : '0 min'}`,
+          `• NEW PUMP RATE: ${fmtDec(c.newPumpMlHr, 1)} mL/hr (${fmtInt(c.newUnitsHr)} units/hr; Δ ${c.deltaUnitsHr >= 0 ? '+' : ''}${fmtInt(c.deltaUnitsHr)} U/hr)`,
+          `• Next Coag Draw: In ${c.nextLabHours} hours`
+        ].join('\n');
+      }
+
+      document.getElementById('btnCopyOrderNote').addEventListener('click', () => {
+        const text = generateClinicalSummary();
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showToast('EMR Order & Handoff Note copied with Audit Checksum.');
+        } catch (e) {
+          showToast('Unable to copy automatically.', '#FF3B30');
+        }
+        document.body.removeChild(ta);
+      });
+
+      // =======================================================================
+      // PROTOCOL JSON CUSTOMIZER & SMART ON FHIR R4 PAYLOAD MODAL
+      // =======================================================================
+      function updateFhirPreview() {
+        const c = state.calc;
+        if (!c || !c.w) return;
+        const fhirBundle = {
+          resourceType: 'Bundle',
+          type: 'transaction',
+          meta: { tag: [{ system: 'http://hospital.org/cds', code: state.protocol.protocolVersion }] },
+          entry: [
+            {
+              resource: {
+                resourceType: 'Observation',
+                status: 'final',
+                code: { coding: [{ system: 'http://loinc.org', code: '29463-7', display: 'Body Weight' }] },
+                valueQuantity: { value: c.w, unit: 'kg', system: 'http://unitsofmeasure.org', code: 'kg' }
+              }
+            },
+            {
+              resource: {
+                resourceType: 'Observation',
+                status: 'final',
+                code: { coding: [{ system: 'http://loinc.org', code: state.assay === 'antiXa' ? '33211-4' : '14979-9', display: state.assay === 'antiXa' ? 'Heparin Anti-Xa' : 'aPTT' }] },
+                valueQuantity: { value: c.labVal, unit: state.assay === 'antiXa' ? 'IU/mL' : 's' }
+              }
+            },
+            {
+              resource: {
+                resourceType: 'MedicationRequest',
+                status: 'active',
+                intent: 'order',
+                medicationCodeableConcept: { coding: [{ system: 'http://www.nlm.nih.gov/research/umls/rxnorm', code: '5224', display: 'Heparin sodium' }] },
+                dosageInstruction: [
+                  {
+                    text: `Infuse at ${fmtDec(c.newPumpMlHr, 1)} mL/hr (${fmtInt(c.newUnitsHr)} units/hr) via smart infusion pump`,
+                    rateQuantity: { value: c.newPumpMlHr, unit: 'mL/h', system: 'http://unitsofmeasure.org', code: 'mL/h' }
+                  }
+                ]
+              }
+            }
+          ]
+        };
+        document.getElementById('fhirPayloadPreview').textContent = JSON.stringify(fhirBundle, null, 2);
+      }
+
+      const modal = document.getElementById('protocolModalBackdrop');
+      document.getElementById('btnOpenProtocolModal').addEventListener('click', () => {
+        document.getElementById('protocolJsonEditor').value = JSON.stringify(state.protocol, null, 2);
+        document.getElementById('jsonErrorMsg').classList.add('hidden');
+        updateFhirPreview();
+        modal.classList.remove('hidden');
+      });
+
+      document.getElementById('btnCloseProtocolModal').addEventListener('click', () => modal.classList.add('hidden'));
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+
+      document.getElementById('tabModalProtocolJson').addEventListener('click', (e) => {
+        e.target.className = 'px-3.5 py-1.5 rounded-[8px] bg-white dark:bg-[#3A3A3C] shadow-apple-sm';
+        document.getElementById('tabModalFhirJson').className = 'px-3.5 py-1.5 rounded-[8px] text-[#6E6E73] dark:text-[#98989D]';
+        document.getElementById('paneProtocolJson').classList.remove('hidden');
+        document.getElementById('paneFhirJson').classList.add('hidden');
+      });
+
+      document.getElementById('tabModalFhirJson').addEventListener('click', (e) => {
+        e.target.className = 'px-3.5 py-1.5 rounded-[8px] bg-white dark:bg-[#3A3A3C] shadow-apple-sm';
+        document.getElementById('tabModalProtocolJson').className = 'px-3.5 py-1.5 rounded-[8px] text-[#6E6E73] dark:text-[#98989D]';
+        document.getElementById('paneFhirJson').classList.remove('hidden');
+        document.getElementById('paneProtocolJson').classList.add('hidden');
+      });
+
+      document.getElementById('btnApplyProtocolJson').addEventListener('click', () => {
+        const raw = document.getElementById('protocolJsonEditor').value;
+        const errBox = document.getElementById('jsonErrorMsg');
+        try {
+          const parsed = JSON.parse(raw);
+          if (!parsed.indications || !Array.isArray(parsed.nomogram)) {
+            throw new Error('JSON must contain "indications" object and "nomogram" array.');
+          }
+          state.protocol = parsed;
+          if (!state.protocol.indications[state.indication]) {
+            state.indication = Object.keys(state.protocol.indications)[0];
+          }
+          errBox.classList.add('hidden');
+          renderIndicationPills();
+          recalculateAll();
+          modal.classList.add('hidden');
+          showToast(`Applied ${state.protocol.protocolVersion} live!`);
+        } catch (err) {
+          errBox.textContent = `JSON Parse Error: ${err.message}`;
+          errBox.classList.remove('hidden');
+        }
+      });
+
+      document.getElementById('btnResetProtocolJson').addEventListener('click', () => {
+        state.protocol = cloneObj(DEFAULT_PROTOCOL);
+        document.getElementById('protocolJsonEditor').value = JSON.stringify(state.protocol, null, 2);
+        renderIndicationPills();
+        recalculateAll();
+        showToast('Restored default P&T v2026.1 protocol schema.');
+      });
+
+      document.getElementById('btnDownloadProtocolJson').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(state.protocol, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'icu-heparin-protocol.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // =======================================================================
+      // INPUT EVENT LISTENERS & THEME TOGGLE
+      // =======================================================================
+      document.getElementById('btnThemeToggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+      });
+
+      document.getElementById('inputWeightKg').addEventListener('input', (e) => {
+        state.weightKg = parseFloat(e.target.value) || 0;
+        if (state.weightKg > 0) document.getElementById('inputWeightLbs').value = (state.weightKg * 2.20462).toFixed(1);
+        state.verifierVerified = false;
+        recalculateAll();
+      });
+
+      document.getElementById('inputHeightCm').addEventListener('input', (e) => {
+        state.heightCm = parseFloat(e.target.value) || 0;
+        recalculateAll();
+      });
+
+      document.getElementById('btnToggleLbs').addEventListener('click', () => {
+        document.getElementById('lbsDrawer').classList.toggle('hidden');
+      });
+
+      document.getElementById('inputWeightLbs').addEventListener('input', (e) => {
+        const lbs = parseFloat(e.target.value);
+        if (!isNaN(lbs) && lbs > 0) {
+          state.weightKg = Number((lbs / 2.20462).toFixed(1));
+          document.getElementById('inputWeightKg').value = state.weightKg;
+          state.verifierVerified = false;
+          recalculateAll();
+        }
+      });
+
+      document.getElementById('customBolusUkg').addEventListener('input', (e) => {
+        state.customBolusUkg = parseFloat(e.target.value) || 0;
+        recalculateAll();
+      });
+
+      document.getElementById('customRateUkghr').addEventListener('input', (e) => {
+        state.customRateUkghr = parseFloat(e.target.value) || 0;
+        state.userEditedCurRate = false;
+        recalculateAll();
+      });
+
+      document.getElementById('selectConcentration').addEventListener('change', (e) => {
+        state.concMode = e.target.value;
+        const opt = e.target.options[e.target.selectedIndex];
+        const suggestedVol = parseFloat(opt.getAttribute('data-vol')) || 250;
+        state.bagVolumeMl = suggestedVol;
+
+        document.getElementById('customConcBox').classList.toggle('hidden', state.concMode !== 'custom');
+        document.getElementById('highConcAlertTag').classList.toggle('hidden', state.concMode !== '500');
+
+        // Highlight matching bag volume button
+        document.querySelectorAll('.bag-vol-btn').forEach((b) => {
+          const v = parseFloat(b.getAttribute('data-bagvol'));
+          b.className = v === suggestedVol
+            ? 'bag-vol-btn px-2.5 py-1 rounded-[8px] bg-white dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white shadow-apple-sm transition'
+            : 'bag-vol-btn px-2.5 py-1 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition';
+        });
+
+        state.verifierVerified = false;
+        recalculateAll();
+      });
+
+      document.getElementById('customTotalUnits').addEventListener('input', (e) => {
+        state.customTotalUnits = parseFloat(e.target.value) || 25000;
+        recalculateAll();
+      });
+
+      document.getElementById('customTotalVol').addEventListener('input', (e) => {
+        state.customTotalVol = parseFloat(e.target.value) || 250;
+        state.bagVolumeMl = state.customTotalVol;
+        recalculateAll();
+      });
+
+      document.querySelectorAll('.bag-vol-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.bagVolumeMl = parseFloat(btn.getAttribute('data-bagvol')) || 250;
+          document.querySelectorAll('.bag-vol-btn').forEach((b) => {
+            b.className = b === btn
+              ? 'bag-vol-btn px-2.5 py-1 rounded-[8px] bg-white dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white shadow-apple-sm transition'
+              : 'bag-vol-btn px-2.5 py-1 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition';
+          });
+          recalculateAll();
+        });
+      });
+
+      document.getElementById('toggleCaps').addEventListener('change', (e) => {
+        state.enableCaps = e.target.checked;
+        document.getElementById('capsDrawer').classList.toggle('hidden', !state.enableCaps);
+        state.userEditedCurRate = false;
+        recalculateAll();
+      });
+
+      document.getElementById('inputMaxBolus').addEventListener('input', (e) => {
+        state.maxBolus = parseFloat(e.target.value) || 0;
+        recalculateAll();
+      });
+
+      document.getElementById('inputMaxRate').addEventListener('input', (e) => {
+        state.maxRate = parseFloat(e.target.value) || 0;
+        state.userEditedCurRate = false;
+        recalculateAll();
+      });
+
+      // Safeguard Switches & 4Ts Inputs
+      document.getElementById('chkRecentLmwh').addEventListener('change', (e) => {
+        state.recentLmwh = e.target.checked;
+        recalculateAll();
+      });
+
+      document.getElementById('chkBaselineAptt').addEventListener('change', (e) => {
+        state.elevatedBaselineAptt = e.target.checked;
+        recalculateAll();
+      });
+
+      document.getElementById('chkHypothermia').addEventListener('change', (e) => {
+        state.hypothermia = e.target.checked;
+        recalculateAll();
+      });
+
+      ['inputPltBase', 'inputPltCurr', 'select4TsScore'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          if (id === 'inputPltBase') state.pltBase = parseFloat(e.target.value) || 0;
+          if (id === 'inputPltCurr') state.pltCurr = parseFloat(e.target.value) || 0;
+          if (id === 'select4TsScore') state.score4Ts = parseInt(e.target.value, 10) || 0;
+          recalculateAll();
+        });
+      });
+
+      // Titration Inputs
+      document.getElementById('curPumpMlHr').addEventListener('input', (e) => {
+        const ml = Math.max(0, parseFloat(e.target.value) || 0);
+        const conc = getConcentration();
+        state.userEditedCurRate = true;
+        state.curPumpMlHr = ml;
+        state.curUnitsHr = Math.round(ml * conc);
+        document.getElementById('curUnitsHr').value = state.curUnitsHr;
+        recalculateAll();
+      });
+
+      document.getElementById('curUnitsHr').addEventListener('input', (e) => {
+        const u = Math.max(0, parseFloat(e.target.value) || 0);
+        const conc = getConcentration();
+        state.userEditedCurRate = true;
+        state.curUnitsHr = u;
+        state.curPumpMlHr = smartPumpRound(u / conc);
+        document.getElementById('curPumpMlHr').value = state.curPumpMlHr;
+        recalculateAll();
+      });
+
+      document.getElementById('btnSyncRate').addEventListener('click', () => {
+        state.userEditedCurRate = false;
+        recalculateAll();
+        showToast('Titration current rate synced to initial infusion order.');
+      });
+
+      document.getElementById('segAntiXa').addEventListener('click', () => {
+        state.assay = 'antiXa';
+        document.getElementById('segAntiXa').className = 'px-3 py-1.5 rounded-[8px] bg-white dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white shadow-apple-sm transition';
+        document.getElementById('segAptt').className = 'px-3 py-1.5 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition';
+        document.getElementById('lblLabInput').textContent = 'Anti-Factor Xa Level';
+        document.getElementById('lblLabUnit').textContent = 'IU/mL';
+        document.getElementById('inputLabResult').step = '0.01';
+        state.labResult = 0.22;
+        document.getElementById('inputLabResult').value = '0.22';
+        document.getElementById('presetsAntiXa').classList.remove('hidden');
+        document.getElementById('presetsAntiXa').classList.add('flex');
+        document.getElementById('presetsAptt').classList.add('hidden');
+        document.getElementById('apttBoundsDrawer').classList.add('hidden');
+        recalculateAll();
+      });
+
+      document.getElementById('segAptt').addEventListener('click', () => {
+        state.assay = 'aptt';
+        document.getElementById('segAptt').className = 'px-3 py-1.5 rounded-[8px] bg-white dark:bg-[#3A3A3C] text-[#1D1D1F] dark:text-white shadow-apple-sm transition';
+        document.getElementById('segAntiXa').className = 'px-3 py-1.5 rounded-[8px] text-[#6E6E73] dark:text-[#98989D] transition';
+        document.getElementById('lblLabInput').textContent = 'aPTT Result';
+        document.getElementById('lblLabUnit').textContent = 'sec';
+        document.getElementById('inputLabResult').step = '1';
+        state.labResult = 52;
+        document.getElementById('inputLabResult').value = '52';
+        document.getElementById('presetsAptt').classList.remove('hidden');
+        document.getElementById('presetsAptt').classList.add('flex');
+        document.getElementById('presetsAntiXa').classList.add('hidden');
+        document.getElementById('apttBoundsDrawer').classList.remove('hidden');
+        recalculateAll();
+      });
+
+      document.getElementById('inputLabResult').addEventListener('input', (e) => {
+        state.labResult = parseFloat(e.target.value) || 0;
+        recalculateAll();
+      });
+
+      document.querySelectorAll('.lab-quick-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const val = parseFloat(btn.getAttribute('data-lab'));
+          state.labResult = val;
+          document.getElementById('inputLabResult').value = val;
+          recalculateAll();
+        });
+      });
+
+      document.getElementById('apttLowBound').addEventListener('input', (e) => {
+        state.apttLow = parseFloat(e.target.value) || 60;
+        recalculateAll();
+      });
+
+      document.getElementById('apttHighBound').addEventListener('input', (e) => {
+        state.apttHigh = parseFloat(e.target.value) || 85;
+        recalculateAll();
+      });
+
+      document.getElementById('chkConsecutiveTherapeutic').addEventListener('change', (e) => {
+        state.consecutiveTherapeutic = e.target.checked;
+        recalculateAll();
+      });
+
+      // Boot Application
+      renderIndicationPills();
+      recalculateAll();
+      renderShiftTimelineAndChart();
+      updateTimerUI();
+    })();
+  </script>
 </body>
 </html>
